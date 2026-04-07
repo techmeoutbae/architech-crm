@@ -11,131 +11,134 @@ import { Loader2 } from "lucide-react"
 
 export default function LoginPage() {
   const router = useRouter()
-  const [email, setEmail] = useState("")
+  const [email, setEmail] = useState("lillian@architechdesigns.net")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [debug, setDebug] = useState("")
-  const [supabaseUrl, setSupabaseUrl] = useState("")
 
   useEffect(() => {
-    setSupabaseUrl(process.env.NEXT_PUBLIC_SUPABASE_URL || "NOT SET")
-  }, [])
+    // Check if already logged in
+    const supabase = createClient()
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) {
+        router.push("/admin/dashboard")
+      }
+    })
+  }, [router])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError("")
-    setDebug("Starting login...")
+    setDebug("Starting...")
 
     const supabase = createClient()
-
-    setDebug("Attempting sign in...")
     
-    const { data, error: signInError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
+    try {
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
 
-    if (signInError) {
-      setError(signInError.message)
-      setDebug("Error: " + signInError.message)
-      setLoading(false)
-      return
-    }
-
-    if (data.user) {
-      setDebug("Success! User ID: " + data.user.id)
-      router.push("/admin/dashboard")
-    } else {
-      setError("No user returned")
-      setDebug("No user data")
+      if (signInError) {
+        setError(signInError.message)
+        setDebug("Error: " + signInError.message)
+      } else if (data.user) {
+        setDebug("Success! Redirecting...")
+        router.push("/admin/dashboard")
+      } else {
+        setError("Login failed - no user returned")
+      }
+    } catch (err: any) {
+      setError("Exception: " + err.message)
+      setDebug("Exception: " + err.message)
     }
     
     setLoading(false)
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0A2540] via-[#1E3A5F] to-[#0A2540] p-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-[#3B82F6] rounded-2xl mb-4">
-            <span className="text-2xl font-bold text-white">AD</span>
+    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "linear-gradient(135deg, #0A2540, #1E3A5F, #0A2540)", padding: "1rem" }}>
+      <div style={{ width: "100%", maxWidth: "28rem" }}>
+        <div style={{ textAlign: "center", marginBottom: "2rem" }}>
+          <div style={{ width: "4rem", height: "4rem", background: "#3B82F6", borderRadius: "0.75rem", display: "inline-flex", alignItems: "center", justifyContent: "center", marginBottom: "1rem" }}>
+            <span style={{ fontSize: "1.5rem", fontWeight: "bold", color: "white" }}>AD</span>
           </div>
-          <h1 className="text-3xl font-bold text-white">Architech Designs</h1>
-          <p className="text-white/60 mt-2">Client Portal & CRM</p>
+          <h1 style={{ fontSize: "1.875rem", fontWeight: "bold", color: "white" }}>Architech Designs</h1>
+          <p style={{ color: "rgba(255,255,255,0.6)", marginTop: "0.5rem" }}>Client Portal & CRM</p>
         </div>
 
-        <Card className="border-0 shadow-2xl">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-xl">Welcome back</CardTitle>
-            <CardDescription>Sign in to your account</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-xs text-gray-400 mb-4 font-mono">
-              Supabase URL: {supabaseUrl}
-            </div>
+        <div style={{ background: "white", borderRadius: "0.75rem", boxShadow: "0 25px 50px -12px rgba(0,0,0,0.25)", padding: "1.5rem" }}>
+          <div style={{ marginBottom: "1rem" }}>
+            <h2 style={{ fontSize: "1.25rem", fontWeight: "600" }}>Welcome back</h2>
+            <p style={{ fontSize: "0.875rem", color: "#6b7280" }}>Sign in to your account</p>
+          </div>
+          
+          <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+            {error && (
+              <div style={{ padding: "0.75rem", background: "#fef2f2", border: "1px solid #fecaca", borderRadius: "0.5rem", color: "#dc2626", fontSize: "0.875rem" }}>
+                {error}
+              </div>
+            )}
             
-            <form onSubmit={handleLogin} className="space-y-4">
-              {error && (
-                <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-600 text-sm">
-                  {error}
-                </div>
-              )}
-              
-              {debug && !error && (
-                <div className="p-2 rounded bg-blue-50 text-blue-600 text-xs font-mono">
-                  {debug}
-                </div>
-              )}
-              
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="you@company.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  autoComplete="email"
-                  className="h-11"
-                />
+            {debug && !error && (
+              <div style={{ padding: "0.5rem", background: "#eff6ff", borderRadius: "0.375rem", color: "#2563eb", fontSize: "0.75rem", fontFamily: "monospace" }}>
+                {debug}
               </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  autoComplete="current-password"
-                  className="h-11"
-                />
-              </div>
+            )}
+          
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+              <label htmlFor="email" style={{ fontSize: "0.875rem", fontWeight: "500", color: "#374151" }}>Email</label>
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                autoComplete="email"
+                style={{ height: "2.75rem", padding: "0 0.75rem", borderRadius: "0.5rem", border: "1px solid #d1d5db", fontSize: "0.875rem" }}
+              />
+            </div>
+          
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+              <label htmlFor="password" style={{ fontSize: "0.875rem", fontWeight: "500", color: "#374151" }}>Password</label>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                autoComplete="current-password"
+                style={{ height: "2.75rem", padding: "0 0.75rem", borderRadius: "0.5rem", border: "1px solid #d1d5db", fontSize: "0.875rem" }}
+              />
+            </div>
 
-              <Button type="submit" className="w-full h-11" disabled={loading}>
-                {loading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Signing in...
-                  </>
-                ) : (
-                  "Sign in"
-                )}
-              </Button>
-            </form>
+            <button 
+              type="submit" 
+              disabled={loading}
+              style={{ height: "2.75rem", background: loading ? "#1e40af" : "#0A2540", color: "white", borderRadius: "0.5rem", fontWeight: "500", cursor: loading ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}
+            >
+              {loading ? (
+                <>
+                  <svg style={{ animation: "spin 1s linear infinite", width: "1rem", height: "1rem" }} viewBox="0 0 24 24" fill="none">
+                    <circle style={{ opacity: "0.25" }} cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path style={{ opacity: "0.75" }} fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                  </svg>
+                  Signing in...
+                </>
+              ) : (
+                "Sign in"
+              )}
+            </button>
+          </form>
 
-            <p className="mt-6 text-center text-sm text-gray-500">
-              Don&apos;t have an account? Contact the administrator.
-            </p>
-          </CardContent>
-        </Card>
+          <p style={{ marginTop: "1.5rem", textAlign: "center", fontSize: "0.875rem", color: "#6b7280" }}>
+            Don&apos;t have an account? Contact the administrator.
+          </p>
+        </div>
 
-        <p className="text-center text-white/40 text-sm mt-6">
+        <p style={{ textAlign: "center", color: "rgba(255,255,255,0.4)", fontSize: "0.875rem", marginTop: "1.5rem" }}>
           &copy; {new Date().getFullYear()} Architech Designs LLC
         </p>
       </div>
