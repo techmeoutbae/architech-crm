@@ -1,7 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { Sidebar } from "@/components/layout/sidebar"
-import { Header } from "@/components/layout/header"
 
 type UserRole = "admin" | "team" | "client"
 
@@ -12,9 +11,9 @@ export default async function DashboardLayout({
 }) {
   const supabase = await createClient()
   
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  const { data: { user } } = await supabase.auth.getUser()
 
-  if (authError || !user) {
+  if (!user) {
     redirect("/login")
   }
 
@@ -25,7 +24,7 @@ export default async function DashboardLayout({
     role: UserRole
   } = {
     email: user.email || "",
-    full_name: user.user_metadata?.full_name || null,
+    full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || null,
     avatar_url: user.user_metadata?.avatar_url || null,
     role: "admin",
   }
@@ -46,13 +45,13 @@ export default async function DashboardLayout({
       }
     }
   } catch (e) {
-    console.error("Error fetching profile:", e)
+    // Silent fail - use defaults
   }
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div style={{ display: "flex", height: "100vh", background: "#F8FAFC" }}>
       <Sidebar user={userData} />
-      <main className="flex-1 flex flex-col overflow-hidden">
+      <main style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
         {children}
       </main>
     </div>

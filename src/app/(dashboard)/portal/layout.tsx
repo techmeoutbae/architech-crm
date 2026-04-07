@@ -24,7 +24,7 @@ export default async function PortalLayout({
     role: UserRole
   } = {
     email: user.email || "",
-    full_name: user.user_metadata?.full_name || null,
+    full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || null,
     avatar_url: user.user_metadata?.avatar_url || null,
     role: "client",
   }
@@ -45,7 +45,7 @@ export default async function PortalLayout({
       }
     }
   } catch (e) {
-    console.error("Error fetching profile:", e)
+    // Silent fail - use defaults
   }
 
   if (userData.role !== 'client') {
@@ -53,9 +53,9 @@ export default async function PortalLayout({
   }
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div style={{ display: "flex", height: "100vh", background: "#F8FAFC" }}>
       <Sidebar user={userData} />
-      <main className="flex-1 flex flex-col overflow-hidden">
+      <main style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
         {children}
       </main>
     </div>

@@ -1,11 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import Link from "next/link"
-import { Header } from "@/components/layout/header"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
-import { Button } from "@/components/ui/button"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import { 
   Users, 
@@ -15,8 +10,10 @@ import {
   TrendingUp, 
   Clock,
   ArrowRight,
+  Plus,
+  FileText,
+  AlertCircle,
   CheckCircle,
-  AlertCircle
 } from "lucide-react"
 
 async function getStats() {
@@ -36,6 +33,7 @@ async function getStats() {
   
   const totalRevenue = invoicesResult.data?.filter(i => i.status === 'paid').reduce((sum, i) => sum + (i.amount || 0), 0) || 0
   const unpaidInvoices = invoicesResult.data?.filter(i => ['sent', 'overdue'].includes(i.status)).length || 0
+  const overdueInvoices = invoicesResult.data?.filter(i => i.status === 'overdue').length || 0
 
   return {
     totalLeads: leadsResult.count || 0,
@@ -46,6 +44,7 @@ async function getStats() {
     completedProjects,
     totalRevenue,
     unpaidInvoices,
+    overdueInvoices,
   }
 }
 
@@ -73,53 +72,33 @@ async function getActiveProjects() {
   return data || []
 }
 
-async function getRecentInvoices() {
-  const supabase = await createClient()
-  const { data } = await supabase
-    .from('invoices')
-    .select(`
-      *,
-      client:clients(business_name)
-    `)
-    .order('created_at', { ascending: false })
-    .limit(5)
-  return data || []
+function getLeadStatusClass(status: string) {
+  const map: Record<string, string> = {
+    new: 'badge-new',
+    contacted: 'badge-contacted',
+    discovery: 'badge-discovery',
+    proposal: 'badge-proposal',
+    won: 'badge-won',
+    lost: 'badge-lost',
+  }
+  return map[status] || 'badge-new'
 }
 
-function getLeadStatusVariant(status: string) {
+function getProjectStatusClass(status: string) {
   const map: Record<string, string> = {
-    new: 'blue',
-    contacted: 'warning',
-    discovery: 'purple',
-    proposal: 'orange',
-    won: 'success',
-    lost: 'destructive',
+    onboarding: 'badge-onboarding',
+    planning: 'badge-planning',
+    design: 'badge-design',
+    development: 'badge-development',
+    revisions: 'badge-revisions',
+    launch: 'badge-launch',
+    completed: 'badge-completed',
   }
-  return map[status] || 'secondary'
+  return map[status] || 'badge-onboarding'
 }
 
-function getProjectStatusVariant(status: string) {
-  const map: Record<string, string> = {
-    onboarding: 'blue',
-    planning: 'indigo',
-    design: 'purple',
-    development: 'cyan',
-    revisions: 'warning',
-    launch: 'orange',
-    completed: 'success',
-  }
-  return map[status] || 'secondary'
-}
-
-function getInvoiceStatusVariant(status: string) {
-  const map: Record<string, string> = {
-    draft: 'secondary',
-    sent: 'blue',
-    paid: 'success',
-    partial: 'warning',
-    overdue: 'destructive',
-  }
-  return map[status] || 'secondary'
+function formatStatus(status: string) {
+  return status?.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) || status
 }
 
 export default async function AdminDashboardPage() {
@@ -128,270 +107,196 @@ export default async function AdminDashboardPage() {
   
   if (!user) redirect("/login")
 
-  const { data: profile } = await supabase
-    .from("users")
-    .select("*")
-    .eq("id", user.id)
-    .single()
-
-  const userData = profile || {
-    email: user.email || "",
-    full_name: user.user_metadata?.full_name || "Admin",
-    avatar_url: user.user_metadata?.avatar_url || null,
-    role: "admin",
-  }
-
   const stats = await getStats()
   const recentLeads = await getRecentLeads()
   const activeProjects = await getActiveProjects()
-  const recentInvoices = await getRecentInvoices()
 
   return (
     <>
-      <Header 
-        title="Dashboard" 
-        subtitle={`Welcome back, ${userData.full_name || 'Admin'}`}
-        user={userData}
-      />
+      {/* Page Header */}
+      <header style={{ background: "white", padding: "20px 24px", borderBottom: "1px solid #E2E8F0" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div>
+            <h1 style={{ fontSize: "22px", fontWeight: "600", color: "#0F172A" }}>Dashboard</h1>
+            <p style={{ fontSize: "13px", color: "#64748B", marginTop: "2px" }}>Welcome back! Here&apos;s your agency overview.</p>
+          </div>
+          <div style={{ display: "flex", gap: "12px" }}>
+            <Link href="/admin/leads" style={{ padding: "10px 20px", background: "white", border: "1px solid #E2E8F0", borderRadius: "8px", fontWeight: "500", fontSize: "14px", color: "#0A2540", textDecoration: "none", display: "flex", alignItems: "center", gap: "8px" }}>
+              <Plus style={{ width: "16px", height: "16px" }} /> Add Lead
+            </Link>
+            <Link href="/admin/projects/new" style={{ padding: "10px 20px", background: "#0A2540", borderRadius: "8px", fontWeight: "500", fontSize: "14px", color: "white", textDecoration: "none", display: "flex", alignItems: "center", gap: "8px" }}>
+              <Plus style={{ width: "16px", height: "16px" }} /> New Project
+            </Link>
+          </div>
+        </div>
+      </header>
       
-      <div className="flex-1 overflow-auto p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="border-l-4 border-l-[#3B82F6]">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-500 font-medium">Active Leads</p>
-                  <p className="text-3xl font-bold text-gray-900 mt-1">{stats.activeLeads}</p>
-                  <p className="text-xs text-gray-400 mt-1">of {stats.totalLeads} total leads</p>
-                </div>
-                <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center">
-                  <Users className="h-6 w-6 text-[#3B82F6]" />
-                </div>
+      {/* Content */}
+      <div style={{ flex: 1, overflow: "auto", padding: "24px" }}>
+        
+        {/* Stats Grid */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "20px", marginBottom: "32px" }}>
+          <div className="stats-card">
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
+              <div style={{ width: "44px", height: "44px", background: "#DBEAFE", borderRadius: "10px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <Users style={{ width: "22px", height: "22px", color: "#3B82F6" }} />
               </div>
-            </CardContent>
-          </Card>
+            </div>
+            <div className="stats-value">{stats.activeLeads}</div>
+            <div className="stats-label">Active Leads</div>
+            <div style={{ fontSize: "12px", color: "#64748B", marginTop: "8px" }}>of {stats.totalLeads} total</div>
+          </div>
 
-          <Card className="border-l-4 border-l-[#10B981]">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-500 font-medium">Active Clients</p>
-                  <p className="text-3xl font-bold text-gray-900 mt-1">{stats.activeClients}</p>
-                  <p className="text-xs text-gray-400 mt-1">of {stats.totalClients} total</p>
-                </div>
-                <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center">
-                  <Building2 className="h-6 w-6 text-[#10B981]" />
-                </div>
+          <div className="stats-card">
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
+              <div style={{ width: "44px", height: "44px", background: "#D1FAE5", borderRadius: "10px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <Building2 style={{ width: "22px", height: "22px", color: "#10B981" }} />
               </div>
-            </CardContent>
-          </Card>
+            </div>
+            <div className="stats-value">{stats.activeClients}</div>
+            <div className="stats-label">Active Clients</div>
+            <div style={{ fontSize: "12px", color: "#64748B", marginTop: "8px" }}>of {stats.totalClients} total</div>
+          </div>
 
-          <Card className="border-l-4 border-l-[#8B5CF6]">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-500 font-medium">Active Projects</p>
-                  <p className="text-3xl font-bold text-gray-900 mt-1">{stats.activeProjects}</p>
-                  <p className="text-xs text-gray-400 mt-1">{stats.completedProjects} completed</p>
-                </div>
-                <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center">
-                  <FolderKanban className="h-6 w-6 text-[#8B5CF6]" />
-                </div>
+          <div className="stats-card">
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
+              <div style={{ width: "44px", height: "44px", background: "#EDE9FE", borderRadius: "10px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <FolderKanban style={{ width: "22px", height: "22px", color: "#8B5CF6" }} />
               </div>
-            </CardContent>
-          </Card>
+            </div>
+            <div className="stats-value">{stats.activeProjects}</div>
+            <div className="stats-label">Active Projects</div>
+            <div style={{ fontSize: "12px", color: "#64748B", marginTop: "8px" }}>{stats.completedProjects} completed</div>
+          </div>
 
-          <Card className="border-l-4 border-l-[#F59E0B]">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-500 font-medium">Total Revenue</p>
-                  <p className="text-3xl font-bold text-gray-900 mt-1">{formatCurrency(stats.totalRevenue)}</p>
-                  <p className="text-xs text-gray-400 mt-1">{stats.unpaidInvoices} unpaid invoices</p>
-                </div>
-                <div className="w-12 h-12 bg-yellow-50 rounded-xl flex items-center justify-center">
-                  <DollarSign className="h-6 w-6 text-[#F59E0B]" />
-                </div>
+          <div className="stats-card">
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
+              <div style={{ width: "44px", height: "44px", background: "#FEF3C7", borderRadius: "10px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <DollarSign style={{ width: "22px", height: "22px", color: "#F59E0B" }} />
               </div>
-            </CardContent>
-          </Card>
+            </div>
+            <div className="stats-value">{formatCurrency(stats.totalRevenue)}</div>
+            <div className="stats-label">Total Revenue</div>
+            <div style={{ fontSize: "12px", color: stats.unpaidInvoices > 0 ? "#DC2626" : "#64748B", marginTop: "8px" }}>
+              {stats.unpaidInvoices > 0 ? `${stats.unpaidInvoices} unpaid invoices` : 'All paid'}
+            </div>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <Card className="lg:col-span-2">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <div>
-                <CardTitle className="text-lg">Active Projects</CardTitle>
-                <CardDescription>Projects currently in progress</CardDescription>
-              </div>
-              <Link href="/admin/projects">
-                <Button variant="ghost" size="sm" className="gap-1">
-                  View all <ArrowRight className="h-4 w-4" />
-                </Button>
+        {/* Main Content Grid */}
+        <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "24px" }}>
+          
+          {/* Active Projects */}
+          <div className="card-premium" style={{ padding: "20px" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" }}>
+              <h2 style={{ fontSize: "16px", fontWeight: "600", color: "#0F172A" }}>Active Projects</h2>
+              <Link href="/admin/projects" style={{ fontSize: "13px", color: "#3B82F6", fontWeight: "500", textDecoration: "none", display: "flex", alignItems: "center", gap: "4px" }}>
+                View all <ArrowRight style={{ width: "14px", height: "14px" }} />
               </Link>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {activeProjects.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
-                    <FolderKanban className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                    <p>No active projects</p>
-                  </div>
-                ) : (
-                  activeProjects.map((project: any) => (
-                    <div key={project.id} className="flex items-center gap-4 p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <p className="font-medium text-gray-900 truncate">{project.name}</p>
-                          <Badge variant={getProjectStatusVariant(project.status) as any}>
-                            {project.status}
-                          </Badge>
-                        </div>
-                        <p className="text-sm text-gray-500 truncate">
-                          {project.client?.business_name || 'No client'}
-                        </p>
-                        <div className="flex items-center gap-2 mt-2">
-                          <Progress value={project.progress_percentage || 0} className="flex-1 h-1.5" />
-                          <span className="text-xs text-gray-500">{project.progress_percentage || 0}%</span>
+            </div>
+            
+            {activeProjects.length === 0 ? (
+              <div className="empty-state" style={{ padding: "32px" }}>
+                <div className="empty-state-icon">
+                  <FolderKanban style={{ width: "28px", height: "28px" }} />
+                </div>
+                <div className="empty-state-title">No active projects</div>
+                <div className="empty-state-description">Create your first project to get started</div>
+              </div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                {activeProjects.map((project: any) => (
+                  <Link key={project.id} href={`/admin/projects/${project.id}`} style={{ textDecoration: "none" }}>
+                    <div style={{ padding: "16px", background: "#F8FAFC", borderRadius: "10px", border: "1px solid #E2E8F0", transition: "all 0.2s", cursor: "pointer" }}>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
+                        <span style={{ fontWeight: "600", color: "#0F172A", fontSize: "14px" }}>{project.name}</span>
+                        <span className={`badge ${getProjectStatusClass(project.status)}`}>{formatStatus(project.status)}</span>
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                        <span style={{ fontSize: "13px", color: "#64748B" }}>{project.client?.business_name || 'No client'}</span>
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                          <div className="progress-premium" style={{ width: "80px" }}>
+                            <div className="progress-premium-bar" style={{ width: `${project.progress_percentage || 0}%` }} />
+                          </div>
+                          <span style={{ fontSize: "12px", color: "#64748B" }}>{project.progress_percentage || 0}%</span>
                         </div>
                       </div>
-                      {project.end_date && (
-                        <div className="text-right">
-                          <p className="text-sm font-medium text-gray-900">
-                            {formatDate(project.end_date)}
-                          </p>
-                          <p className="text-xs text-gray-500">Due</p>
-                        </div>
-                      )}
                     </div>
-                  ))
-                )}
+                  </Link>
+                ))}
               </div>
-            </CardContent>
-          </Card>
+            )}
+          </div>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <div>
-                <CardTitle className="text-lg">Recent Leads</CardTitle>
-                <CardDescription>Latest lead submissions</CardDescription>
-              </div>
-              <Link href="/admin/leads">
-                <Button variant="ghost" size="sm" className="gap-1">
-                  View all <ArrowRight className="h-4 w-4" />
-                </Button>
+          {/* Recent Leads */}
+          <div className="card-premium" style={{ padding: "20px" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" }}>
+              <h2 style={{ fontSize: "16px", fontWeight: "600", color: "#0F172A" }}>Recent Leads</h2>
+              <Link href="/admin/leads" style={{ fontSize: "13px", color: "#3B82F6", fontWeight: "500", textDecoration: "none", display: "flex", alignItems: "center", gap: "4px" }}>
+                View all <ArrowRight style={{ width: "14px", height: "14px" }} />
               </Link>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {recentLeads.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
-                    <Users className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                    <p>No leads yet</p>
-                  </div>
-                ) : (
-                  recentLeads.map((lead: any) => (
-                    <Link 
-                      key={lead.id} 
-                      href={`/admin/leads/${lead.id}`}
-                      className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
-                    >
-                      <div className="w-10 h-10 bg-gradient-to-br from-[#3B82F6] to-[#1E40AF] rounded-lg flex items-center justify-center text-white text-sm font-medium">
+            </div>
+            
+            {recentLeads.length === 0 ? (
+              <div className="empty-state" style={{ padding: "32px" }}>
+                <div className="empty-state-icon">
+                  <Users style={{ width: "28px", height: "28px" }} />
+                </div>
+                <div className="empty-state-title">No leads yet</div>
+                <div className="empty-state-description">Leads will appear here</div>
+              </div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                {recentLeads.map((lead: any) => (
+                  <Link key={lead.id} href={`/admin/leads/${lead.id}`} style={{ textDecoration: "none" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "12px", padding: "12px", background: "#F8FAFC", borderRadius: "8px", border: "1px solid #E2E8F0", transition: "all 0.2s" }}>
+                      <div style={{ width: "40px", height: "40px", background: "linear-gradient(135deg, #3B82F6, #60A5FA)", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: "600", fontSize: "14px" }}>
                         {lead.business_name?.charAt(0) || 'L'}
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-gray-900 text-sm truncate">{lead.business_name}</p>
-                        <p className="text-xs text-gray-500 truncate">{lead.email}</p>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontWeight: "500", color: "#0F172A", fontSize: "14px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{lead.business_name}</div>
+                        <div style={{ fontSize: "12px", color: "#64748B" }}>{lead.email}</div>
                       </div>
-                      <Badge variant={getLeadStatusVariant(lead.status) as any} className="text-xs">
-                        {lead.status}
-                      </Badge>
-                    </Link>
-                  ))
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <div>
-                <CardTitle className="text-lg">Recent Invoices</CardTitle>
-                <CardDescription>Latest invoice activity</CardDescription>
-              </div>
-              <Link href="/admin/invoices">
-                <Button variant="ghost" size="sm" className="gap-1">
-                  View all <ArrowRight className="h-4 w-4" />
-                </Button>
-              </Link>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {recentInvoices.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
-                    <DollarSign className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                    <p>No invoices yet</p>
-                  </div>
-                ) : (
-                  recentInvoices.map((invoice: any) => (
-                    <div key={invoice.id} className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
-                      <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
-                        <DollarSign className="h-5 w-5 text-gray-500" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-gray-900 text-sm">{invoice.invoice_number}</p>
-                        <p className="text-xs text-gray-500 truncate">{invoice.client?.business_name || 'No client'}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-medium text-gray-900 text-sm">{formatCurrency(invoice.amount)}</p>
-                        <Badge variant={getInvoiceStatusVariant(invoice.status) as any} className="text-xs">
-                          {invoice.status}
-                        </Badge>
-                      </div>
+                      <span className={`badge ${getLeadStatusClass(lead.status)}`}>{formatStatus(lead.status)}</span>
                     </div>
-                  ))
-                )}
+                  </Link>
+                ))}
               </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Quick Actions</CardTitle>
-              <CardDescription>Common tasks and shortcuts</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-3">
-                <Link href="/admin/leads/new">
-                  <Button variant="outline" className="w-full h-auto py-4 flex flex-col items-center gap-2">
-                    <Users className="h-5 w-5 text-[#3B82F6]" />
-                    <span className="text-sm">Add Lead</span>
-                  </Button>
-                </Link>
-                <Link href="/admin/clients/new">
-                  <Button variant="outline" className="w-full h-auto py-4 flex flex-col items-center gap-2">
-                    <Building2 className="h-5 w-5 text-[#10B981]" />
-                    <span className="text-sm">Add Client</span>
-                  </Button>
-                </Link>
-                <Link href="/admin/projects/new">
-                  <Button variant="outline" className="w-full h-auto py-4 flex flex-col items-center gap-2">
-                    <FolderKanban className="h-5 w-5 text-[#8B5CF6]" />
-                    <span className="text-sm">New Project</span>
-                  </Button>
-                </Link>
-                <Link href="/admin/invoices/new">
-                  <Button variant="outline" className="w-full h-auto py-4 flex flex-col items-center gap-2">
-                    <DollarSign className="h-5 w-5 text-[#F59E0B]" />
-                    <span className="text-sm">Create Invoice</span>
-                  </Button>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
+            )}
+          </div>
         </div>
+
+        {/* Quick Actions */}
+        <div style={{ marginTop: "32px" }}>
+          <h2 style={{ fontSize: "16px", fontWeight: "600", color: "#0F172A", marginBottom: "16px" }}>Quick Actions</h2>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "16px" }}>
+            <Link href="/admin/leads" style={{ textDecoration: "none" }}>
+              <div style={{ padding: "20px", background: "white", borderRadius: "12px", border: "1px solid #E2E8F0", textAlign: "center", transition: "all 0.2s" }}>
+                <Users style={{ width: "24px", height: "24px", color: "#3B82F6", margin: "0 auto 12px" }} />
+                <span style={{ fontSize: "14px", fontWeight: "500", color: "#0F172A" }}>Add Lead</span>
+              </div>
+            </Link>
+            <Link href="/admin/clients" style={{ textDecoration: "none" }}>
+              <div style={{ padding: "20px", background: "white", borderRadius: "12px", border: "1px solid #E2E8F0", textAlign: "center", transition: "all 0.2s" }}>
+                <Building2 style={{ width: "24px", height: "24px", color: "#10B981", margin: "0 auto 12px" }} />
+                <span style={{ fontSize: "14px", fontWeight: "500", color: "#0F172A" }}>Add Client</span>
+              </div>
+            </Link>
+            <Link href="/admin/projects" style={{ textDecoration: "none" }}>
+              <div style={{ padding: "20px", background: "white", borderRadius: "12px", border: "1px solid #E2E8F0", textAlign: "center", transition: "all 0.2s" }}>
+                <FolderKanban style={{ width: "24px", height: "24px", color: "#8B5CF6", margin: "0 auto 12px" }} />
+                <span style={{ fontSize: "14px", fontWeight: "500", color: "#0F172A" }}>New Project</span>
+              </div>
+            </Link>
+            <Link href="/admin/invoices" style={{ textDecoration: "none" }}>
+              <div style={{ padding: "20px", background: "white", borderRadius: "12px", border: "1px solid #E2E8F0", textAlign: "center", transition: "all 0.2s" }}>
+                <FileText style={{ width: "24px", height: "24px", color: "#F59E0B", margin: "0 auto 12px" }} />
+                <span style={{ fontSize: "14px", fontWeight: "500", color: "#0F172A" }}>Create Invoice</span>
+              </div>
+            </Link>
+          </div>
+        </div>
+
       </div>
     </>
   )
