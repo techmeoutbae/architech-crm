@@ -1,7 +1,8 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { Sidebar } from "@/components/layout/sidebar"
-import { Header } from "@/components/layout/header"
+
+type UserRole = "admin" | "team" | "client"
 
 export default async function PortalLayout({
   children,
@@ -16,11 +17,16 @@ export default async function PortalLayout({
     redirect("/login")
   }
 
-  let userData = {
+  let userData: {
+    email: string
+    full_name: string | null
+    avatar_url: string | null
+    role: UserRole
+  } = {
     email: user.email || "",
     full_name: user.user_metadata?.full_name || null,
     avatar_url: user.user_metadata?.avatar_url || null,
-    role: "client" as const,
+    role: "client",
   }
 
   try {
@@ -35,7 +41,7 @@ export default async function PortalLayout({
         email: profile.email || user.email || "",
         full_name: profile.full_name,
         avatar_url: profile.avatar_url,
-        role: profile.role as "admin" | "team" | "client",
+        role: (profile.role as UserRole) || "client",
       }
     }
   } catch (e) {
