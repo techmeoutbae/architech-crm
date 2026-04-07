@@ -1,22 +1,47 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import Link from "next/link"
-import { Header } from "@/components/layout/header"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Progress } from "@/components/ui/progress"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { MoreHorizontal, FolderKanban, Calendar, DollarSign } from "lucide-react"
 import { formatDate, formatCurrency } from "@/lib/utils"
-import { PROJECT_STATUS_LABELS } from "@/lib/constants"
+import { FolderKanban, Plus, ArrowRight, Building2 } from "lucide-react"
 
-const STATUS_VARIANTS: Record<string, string> = {
-  onboarding: 'blue', planning: 'indigo', design: 'purple', development: 'cyan', revisions: 'warning', launch: 'orange', completed: 'success'
+const STATUS_LABELS: Record<string, string> = {
+  onboarding: 'Onboarding',
+  planning: 'Planning',
+  design: 'Design',
+  development: 'Development',
+  revisions: 'Revisions',
+  launch: 'Launch',
+  completed: 'Completed',
 }
 
-const PACKAGE_VARIANTS: Record<string, string> = {
-  basic: 'secondary', premium: 'blue', growth: 'success', custom: 'purple'
+const PACKAGE_LABELS: Record<string, string> = {
+  basic: 'Basic',
+  premium: 'Premium',
+  growth: 'Growth',
+  custom: 'Custom',
+}
+
+function getStatusClass(status: string) {
+  const map: Record<string, string> = {
+    onboarding: 'badge-onboarding',
+    planning: 'badge-planning',
+    design: 'badge-design',
+    development: 'badge-development',
+    revisions: 'badge-revisions',
+    launch: 'badge-launch',
+    completed: 'badge-completed',
+  }
+  return map[status] || 'badge-onboarding'
+}
+
+function getPackageClass(pkg: string) {
+  const map: Record<string, string> = {
+    basic: 'badge-inactive',
+    premium: 'badge-new',
+    growth: 'badge-won',
+    custom: 'badge-discovery',
+  }
+  return map[pkg] || 'badge-inactive'
 }
 
 async function getProjects() {
@@ -31,124 +56,92 @@ async function getProjects() {
   return data || []
 }
 
-async function getUserData() {
+export default async function ProjectsPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return null
-  const { data: profile } = await supabase.from("users").select("*").eq("id", user.id).single()
-  return profile || { email: user.email || "", full_name: user.user_metadata?.full_name || "Admin", avatar_url: user.user_metadata?.avatar_url || null, role: "admin" }
-}
-
-export default async function ProjectsPage() {
-  const userData = await getUserData()
-  if (!userData) redirect("/login")
+  if (!user) redirect("/login")
   
   const projects = await getProjects()
 
-  const statusCounts = projects.reduce((acc, p) => {
+  const statusCounts = projects.reduce((acc: Record<string, number>, p) => {
     acc[p.status] = (acc[p.status] || 0) + 1
     return acc
-  }, {} as Record<string, number>)
+  }, {})
 
   return (
     <>
-      <Header title="Projects" subtitle="Manage all client projects" user={userData} showSearch showAddButton addButtonLabel="New Project" />
+      {/* Page Header */}
+      <header style={{ background: "white", padding: "20px 24px", borderBottom: "1px solid #E2E8F0" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div>
+            <h1 style={{ fontSize: "22px", fontWeight: "600", color: "#0F172A" }}>Projects</h1>
+            <p style={{ fontSize: "13px", color: "#64748B", marginTop: "2px" }}>Track and manage client projects</p>
+          </div>
+          <button style={{ padding: "10px 20px", background: "#0A2540", borderRadius: "8px", fontWeight: "500", fontSize: "14px", color: "white", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px" }}>
+            <Plus style={{ width: "16px", height: "16px" }} /> New Project
+          </button>
+        </div>
+      </header>
       
-      <div className="flex-1 overflow-auto p-6">
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-6">
-          {Object.entries(PROJECT_STATUS_LABELS).slice(0, 6).map(([status, label]) => (
-            <Link key={status} href={`/admin/projects?status=${status}`}>
-              <Card className="hover:shadow-md transition-shadow cursor-pointer">
-                <CardContent className="pt-4">
-                  <p className="text-2xl font-bold text-gray-900">{statusCounts[status] || 0}</p>
-                  <p className="text-xs text-gray-500">{label}</p>
-                </CardContent>
-              </Card>
-            </Link>
+      {/* Content */}
+      <div style={{ flex: 1, overflow: "auto", padding: "24px" }}>
+        
+        {/* Status Pipeline */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: "12px", marginBottom: "24px" }}>
+          {Object.entries(STATUS_LABELS).map(([status, label]) => (
+            <div key={status} className="card-premium" style={{ padding: "16px", textAlign: "center" }}>
+              <div style={{ fontSize: "24px", fontWeight: "700", color: "#0F172A" }}>{statusCounts[status] || 0}</div>
+              <div style={{ fontSize: "12px", color: "#64748B", marginTop: "4px" }}>{label}</div>
+            </div>
           ))}
-          <Link href="/admin/projects?status=completed">
-            <Card className="hover:shadow-md transition-shadow cursor-pointer">
-              <CardContent className="pt-4">
-                <p className="text-2xl font-bold text-gray-900">{statusCounts['completed'] || 0}</p>
-                <p className="text-xs text-gray-500">Completed</p>
-              </CardContent>
-            </Card>
-          </Link>
         </div>
 
-        <Card>
-          <CardHeader className="pb-4">
-            <CardTitle>All Projects</CardTitle>
-            <CardDescription>{projects.length} total projects</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Project</TableHead>
-                  <TableHead>Client</TableHead>
-                  <TableHead>Package</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Progress</TableHead>
-                  <TableHead>Budget</TableHead>
-                  <TableHead>Due Date</TableHead>
-                  <TableHead className="w-[50px]"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {projects.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={8} className="text-center py-12 text-gray-500">
-                      <FolderKanban className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                      <p>No projects found</p>
-                      <p className="text-sm">Create your first project to get started</p>
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  projects.map((project: any) => (
-                    <TableRow key={project.id}>
-                      <TableCell>
-                        <Link href={`/admin/projects/${project.id}`} className="hover:text-[#3B82F6]">
-                          <p className="font-medium text-gray-900">{project.name}</p>
-                        </Link>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-sm text-gray-600">{project.client?.business_name || '-'}</span>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={PACKAGE_VARIANTS[project.package_type] as any || 'secondary'}>
-                          {project.package_type || 'custom'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={STATUS_VARIANTS[project.status] as any || 'secondary'}>
-                          {PROJECT_STATUS_LABELS[project.status] || project.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Progress value={project.progress_percentage || 0} className="w-20 h-1.5" />
-                          <span className="text-xs text-gray-500">{project.progress_percentage || 0}%</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-sm font-medium text-gray-900">{formatCurrency(project.budget)}</span>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-sm text-gray-500">{project.end_date ? formatDate(project.end_date) : '-'}</span>
-                      </TableCell>
-                      <TableCell>
-                        <Link href={`/admin/projects/${project.id}`}>
-                          <Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button>
-                        </Link>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+        {/* Projects Grid */}
+        {projects.length === 0 ? (
+          <div className="card-premium" style={{ padding: "48px", textAlign: "center" }}>
+            <div className="empty-state-icon">
+              <FolderKanban style={{ width: "28px", height: "28px" }} />
+            </div>
+            <div className="empty-state-title">No projects yet</div>
+            <div className="empty-state-description">Create your first project to get started</div>
+          </div>
+        ) : (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "20px" }}>
+            {projects.map((project: any) => (
+              <Link key={project.id} href={`/admin/projects/${project.id}`} style={{ textDecoration: "none" }}>
+                <div className="card-premium" style={{ padding: "20px", transition: "all 0.2s" }}>
+                  <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "16px" }}>
+                    <div>
+                      <div style={{ fontWeight: "600", color: "#0F172A", fontSize: "16px", marginBottom: "4px" }}>{project.name}</div>
+                      <div style={{ fontSize: "13px", color: "#64748B" }}>{project.client?.business_name || 'No client'}</div>
+                    </div>
+                    <div style={{ display: "flex", gap: "8px" }}>
+                      <span className={`badge ${getPackageClass(project.package_type)}`}>{PACKAGE_LABELS[project.package_type] || project.package_type}</span>
+                      <span className={`badge ${getStatusClass(project.status)}`}>{STATUS_LABELS[project.status] || project.status}</span>
+                    </div>
+                  </div>
+                  
+                  {/* Progress */}
+                  <div style={{ marginBottom: "16px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
+                      <span style={{ fontSize: "13px", color: "#64748B" }}>Progress</span>
+                      <span style={{ fontSize: "13px", fontWeight: "500", color: "#0F172A" }}>{project.progress_percentage || 0}%</span>
+                    </div>
+                    <div className="progress-premium">
+                      <div className="progress-premium-bar" style={{ width: `${project.progress_percentage || 0}%` }} />
+                    </div>
+                  </div>
+                  
+                  {/* Footer */}
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", color: "#64748B" }}>
+                    <div>{project.package_type} package</div>
+                    {project.end_date && <div>Due: {formatDate(project.end_date)}</div>}
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
     </>
   )

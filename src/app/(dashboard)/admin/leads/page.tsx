@@ -1,201 +1,143 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import Link from "next/link"
-import { Header } from "@/components/layout/header"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table"
-import { 
-  Search, 
-  Plus, 
-  Filter, 
-  MoreHorizontal,
-  Phone,
-  Mail,
-  Building2,
-  Calendar,
-  DollarSign
-} from "lucide-react"
 import { formatDate, formatCurrency } from "@/lib/utils"
-import { LEAD_STATUS_LABELS, LEAD_STATUS_COLORS } from "@/lib/constants"
+import { Users, Plus, ArrowRight, Building2 } from "lucide-react"
 
-async function getLeads(search?: string) {
-  const supabase = await createClient()
-  let query = supabase.from('leads').select('*').order('created_at', { ascending: false })
-  
-  if (search) {
-    query = query.or(`business_name.ilike.%${search}%,contact_name.ilike.%${search}%,email.ilike.%${search}%`)
+const STATUS_LABELS: Record<string, string> = {
+  new: 'New',
+  contacted: 'Contacted',
+  discovery: 'Discovery',
+  proposal: 'Proposal',
+  won: 'Won',
+  lost: 'Lost',
+}
+
+function getStatusClass(status: string) {
+  const map: Record<string, string> = {
+    new: 'badge-new',
+    contacted: 'badge-contacted',
+    discovery: 'badge-discovery',
+    proposal: 'badge-proposal',
+    won: 'badge-won',
+    lost: 'badge-lost',
   }
-  
-  const { data } = await query
+  return map[status] || 'badge-new'
+}
+
+function formatStatus(status: string) {
+  return STATUS_LABELS[status] || status
+}
+
+async function getLeads() {
+  const supabase = await createClient()
+  const { data } = await supabase.from('leads').select('*').order('created_at', { ascending: false })
   return data || []
 }
 
-async function getUserData() {
+export default async function LeadsPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect("/login")
   
-  if (!user) return null
-  
-  const { data: profile } = await supabase
-    .from("users")
-    .select("*")
-    .eq("id", user.id)
-    .single()
+  const leads = await getLeads()
 
-  return profile || {
-    email: user.email || "",
-    full_name: user.user_metadata?.full_name || "Admin",
-    avatar_url: user.user_metadata?.avatar_url || null,
-    role: "admin",
-  }
-}
-
-function getStatusBadgeVariant(status: string) {
-  const map: Record<string, string> = {
-    new: 'blue',
-    contacted: 'warning',
-    discovery: 'purple',
-    proposal: 'orange',
-    won: 'success',
-    lost: 'destructive',
-  }
-  return map[status] || 'secondary'
-}
-
-export default async function LeadsPage({
-  searchParams,
-}: {
-  searchParams: { search?: string }
-}) {
-  const userData = await getUserData()
-  if (!userData) redirect("/login")
-  
-  const leads = await getLeads(searchParams.search)
-
-  const statusCounts = leads.reduce((acc, lead) => {
+  const statusCounts = leads.reduce((acc: Record<string, number>, lead) => {
     acc[lead.status] = (acc[lead.status] || 0) + 1
     return acc
-  }, {} as Record<string, number>)
+  }, {})
 
   return (
     <>
-      <Header 
-        title="Leads" 
-        subtitle="Manage your sales pipeline and leads"
-        user={userData}
-        showSearch
-        showAddButton
-        addButtonLabel="Add Lead"
-      />
+      {/* Page Header */}
+      <header style={{ background: "white", padding: "20px 24px", borderBottom: "1px solid #E2E8F0" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div>
+            <h1 style={{ fontSize: "22px", fontWeight: "600", color: "#0F172A" }}>Leads</h1>
+            <p style={{ fontSize: "13px", color: "#64748B", marginTop: "2px" }}>Manage your sales pipeline and prospects</p>
+          </div>
+          <button style={{ padding: "10px 20px", background: "#0A2540", borderRadius: "8px", fontWeight: "500", fontSize: "14px", color: "white", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px" }}>
+            <Plus style={{ width: "16px", height: "16px" }} /> Add Lead
+          </button>
+        </div>
+      </header>
       
-      <div className="flex-1 overflow-auto p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-6">
-          {Object.entries(LEAD_STATUS_LABELS).map(([status, label]) => (
-            <Link key={status} href={`/admin/leads?search=&status=${status}`}>
-              <Card className="hover:shadow-md transition-shadow cursor-pointer">
-                <CardContent className="pt-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-2xl font-bold text-gray-900">{statusCounts[status] || 0}</p>
-                      <p className="text-xs text-gray-500">{label}</p>
-                    </div>
-                    <div className={`w-3 h-3 rounded-full ${LEAD_STATUS_COLORS[status]?.replace('bg-', 'bg-').replace('text-', 'text-').replace('border-', 'border-')}`} />
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
+      {/* Content */}
+      <div style={{ flex: 1, overflow: "auto", padding: "24px" }}>
+        
+        {/* Status Pipeline */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: "12px", marginBottom: "24px" }}>
+          {Object.entries(STATUS_LABELS).map(([status, label]) => (
+            <div key={status} className="card-premium" style={{ padding: "16px", textAlign: "center" }}>
+              <div style={{ fontSize: "24px", fontWeight: "700", color: "#0F172A" }}>{statusCounts[status] || 0}</div>
+              <div style={{ fontSize: "12px", color: "#64748B", marginTop: "4px" }}>{label}</div>
+            </div>
           ))}
         </div>
 
-        <Card>
-          <CardHeader className="pb-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle>All Leads</CardTitle>
-                <CardDescription>{leads.length} total leads</CardDescription>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Business</TableHead>
-                  <TableHead>Contact</TableHead>
-                  <TableHead>Service</TableHead>
-                  <TableHead>Source</TableHead>
-                  <TableHead>Value</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Added</TableHead>
-                  <TableHead className="w-[50px]"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {leads.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={8} className="text-center py-12 text-gray-500">
-                      <Building2 className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                      <p>No leads found</p>
-                      <p className="text-sm">Add your first lead to get started</p>
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  leads.map((lead: any) => (
-                    <TableRow key={lead.id}>
-                      <TableCell>
-                        <Link href={`/admin/leads/${lead.id}`} className="hover:text-[#3B82F6]">
-                          <p className="font-medium text-gray-900">{lead.business_name}</p>
-                        </Link>
-                      </TableCell>
-                      <TableCell>
-                        <div>
-                          <p className="text-sm font-medium text-gray-900">{lead.contact_name}</p>
-                          <p className="text-xs text-gray-500">{lead.email}</p>
+        {/* Leads Table */}
+        <div className="card-premium" style={{ overflow: "hidden" }}>
+          <table className="table-premium">
+            <thead>
+              <tr>
+                <th>Business</th>
+                <th>Contact</th>
+                <th>Service</th>
+                <th>Source</th>
+                <th>Value</th>
+                <th>Status</th>
+                <th>Added</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {leads.length === 0 ? (
+                <tr>
+                  <td colSpan={8}>
+                    <div className="empty-state">
+                      <div className="empty-state-icon">
+                        <Users style={{ width: "28px", height: "28px" }} />
+                      </div>
+                      <div className="empty-state-title">No leads yet</div>
+                      <div className="empty-state-description">Add your first lead to start tracking prospects</div>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                leads.map((lead: any) => (
+                  <tr key={lead.id}>
+                    <td>
+                      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                        <div style={{ width: "36px", height: "36px", background: "linear-gradient(135deg, #3B82F6, #60A5FA)", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: "600", fontSize: "14px" }}>
+                          {lead.business_name?.charAt(0) || 'L'}
                         </div>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-sm text-gray-600">{lead.service_interest || '-'}</span>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-sm text-gray-600">{lead.source || '-'}</span>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-sm font-medium text-gray-900">
-                          {formatCurrency(lead.estimated_value)}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={getStatusBadgeVariant(lead.status) as any}>
-                          {LEAD_STATUS_LABELS[lead.status] || lead.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-sm text-gray-500">{formatDate(lead.created_at)}</span>
-                      </TableCell>
-                      <TableCell>
-                        <Link href={`/admin/leads/${lead.id}`}>
-                          <Button variant="ghost" size="icon">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </Link>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+                        <span style={{ fontWeight: "500", color: "#0F172A" }}>{lead.business_name}</span>
+                      </div>
+                    </td>
+                    <td>
+                      <div style={{ fontWeight: "500", color: "#0F172A" }}>{lead.contact_name}</div>
+                      <div style={{ fontSize: "12px", color: "#64748B" }}>{lead.email}</div>
+                    </td>
+                    <td style={{ color: "#64748B" }}>{lead.service_interest || '-'}</td>
+                    <td style={{ color: "#64748B" }}>{lead.source || '-'}</td>
+                    <td>
+                      <span style={{ fontWeight: "500", color: "#0F172A" }}>{formatCurrency(lead.estimated_value)}</span>
+                    </td>
+                    <td>
+                      <span className={`badge ${getStatusClass(lead.status)}`}>{formatStatus(lead.status)}</span>
+                    </td>
+                    <td style={{ color: "#64748B", fontSize: "13px" }}>{formatDate(lead.created_at)}</td>
+                    <td>
+                      <Link href={`/admin/leads/${lead.id}`} style={{ color: "#3B82F6", textDecoration: "none", fontSize: "14px", fontWeight: "500" }}>
+                        View
+                      </Link>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </>
   )

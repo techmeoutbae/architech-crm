@@ -1,25 +1,17 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import Link from "next/link"
-import { Header } from "@/components/layout/header"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table"
-import { MoreHorizontal, Building2, Mail, Phone, FolderKanban } from "lucide-react"
 import { formatDate } from "@/lib/utils"
+import { Building2, Plus, Users, FolderKanban } from "lucide-react"
 
-const STATUS_VARIANTS: Record<string, string> = {
-  active: 'success',
-  inactive: 'secondary',
-  completed: 'blue',
+const STATUS_LABELS: Record<string, string> = {
+  active: 'Active',
+  inactive: 'Inactive',
+  completed: 'Completed',
+}
+
+function getStatusClass(status: string) {
+  return status === 'active' ? 'badge-active' : status === 'completed' ? 'badge-completed' : 'badge-inactive'
 }
 
 async function getClients() {
@@ -28,120 +20,76 @@ async function getClients() {
     .from('clients')
     .select(`
       *,
-      projects(id, name, status, progress_percentage)
+      projects(id, name, status)
     `)
     .order('created_at', { ascending: false })
   return data || []
 }
 
-async function getUserData() {
+export default async function ClientsPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return null
-  const { data: profile } = await supabase.from("users").select("*").eq("id", user.id).single()
-  return profile || {
-    email: user.email || "",
-    full_name: user.user_metadata?.full_name || "Admin",
-    avatar_url: user.user_metadata?.avatar_url || null,
-    role: "admin",
-  }
-}
-
-export default async function ClientsPage() {
-  const userData = await getUserData()
-  if (!userData) redirect("/login")
+  if (!user) redirect("/login")
   
   const clients = await getClients()
 
   return (
     <>
-      <Header 
-        title="Clients" 
-        subtitle="Manage your client relationships"
-        user={userData}
-        showSearch
-        showAddButton
-        addButtonLabel="Add Client"
-      />
+      {/* Page Header */}
+      <header style={{ background: "white", padding: "20px 24px", borderBottom: "1px solid #E2E8F0" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div>
+            <h1 style={{ fontSize: "22px", fontWeight: "600", color: "#0F172A" }}>Clients</h1>
+            <p style={{ fontSize: "13px", color: "#64748B", marginTop: "2px" }}>Manage your client relationships</p>
+          </div>
+          <button style={{ padding: "10px 20px", background: "#0A2540", borderRadius: "8px", fontWeight: "500", fontSize: "14px", color: "white", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px" }}>
+            <Plus style={{ width: "16px", height: "16px" }} /> Add Client
+          </button>
+        </div>
+      </header>
       
-      <div className="flex-1 overflow-auto p-6">
-        <Card>
-          <CardHeader className="pb-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle>All Clients</CardTitle>
-                <CardDescription>{clients.length} total clients</CardDescription>
-              </div>
+      {/* Content */}
+      <div style={{ flex: 1, overflow: "auto", padding: "24px" }}>
+        
+        {/* Clients Grid */}
+        {clients.length === 0 ? (
+          <div className="card-premium" style={{ padding: "48px", textAlign: "center" }}>
+            <div className="empty-state-icon">
+              <Building2 style={{ width: "28px", height: "28px" }} />
             </div>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Business</TableHead>
-                  <TableHead>Contact</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Phone</TableHead>
-                  <TableHead>Projects</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Added</TableHead>
-                  <TableHead className="w-[50px]"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {clients.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={8} className="text-center py-12 text-gray-500">
-                      <Building2 className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                      <p>No clients found</p>
-                      <p className="text-sm">Add your first client to get started</p>
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  clients.map((client: any) => (
-                    <TableRow key={client.id}>
-                      <TableCell>
-                        <Link href={`/admin/clients/${client.id}`} className="hover:text-[#3B82F6]">
-                          <p className="font-medium text-gray-900">{client.business_name}</p>
-                        </Link>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-sm text-gray-600">{client.contact_name}</span>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-sm text-gray-600">{client.email}</span>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-sm text-gray-600">{client.phone || '-'}</span>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1">
-                          <FolderKanban className="h-4 w-4 text-gray-400" />
-                          <span className="text-sm">{client.projects?.length || 0}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={STATUS_VARIANTS[client.status] as any || 'secondary'}>
-                          {client.status || 'active'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-sm text-gray-500">{formatDate(client.created_at)}</span>
-                      </TableCell>
-                      <TableCell>
-                        <Link href={`/admin/clients/${client.id}`}>
-                          <Button variant="ghost" size="icon">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </Link>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+            <div className="empty-state-title">No clients yet</div>
+            <div className="empty-state-description">Add your first client to get started</div>
+          </div>
+        ) : (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "20px" }}>
+            {clients.map((client: any) => (
+              <Link key={client.id} href={`/admin/clients/${client.id}`} style={{ textDecoration: "none" }}>
+                <div className="card-premium" style={{ padding: "20px", transition: "all 0.2s" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "16px" }}>
+                    <div style={{ width: "48px", height: "48px", background: "linear-gradient(135deg, #10B981, #34D399)", borderRadius: "12px", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: "700", fontSize: "18px" }}>
+                      {client.business_name?.charAt(0) || 'C'}
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: "600", color: "#0F172A", fontSize: "16px" }}>{client.business_name}</div>
+                      <div style={{ fontSize: "13px", color: "#64748B" }}>{client.contact_name}</div>
+                    </div>
+                    <span className={`badge ${getStatusClass(client.status)}`}>{STATUS_LABELS[client.status] || client.status}</span>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "16px", fontSize: "13px", color: "#64748B" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                      <FolderKanban style={{ width: "14px", height: "14px" }} />
+                      {client.projects?.length || 0} projects
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                      <Users style={{ width: "14px", height: "14px" }} />
+                      Since {formatDate(client.created_at)}
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
     </>
   )
