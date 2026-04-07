@@ -34,7 +34,7 @@ export default async function DashboardLayout({
       .from("users")
       .select("*")
       .eq("id", user.id)
-      .single()
+      .maybeSingle()
 
     if (profile) {
       userData = {
@@ -45,7 +45,7 @@ export default async function DashboardLayout({
       }
     }
   } catch (e) {
-    // User record doesn't exist yet, use defaults
+    console.error("Error fetching profile:", e)
   }
 
   return (

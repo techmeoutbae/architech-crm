@@ -34,7 +34,7 @@ export default async function PortalLayout({
       .from("users")
       .select("*")
       .eq("id", user.id)
-      .single()
+      .maybeSingle()
 
     if (profile) {
       userData = {
@@ -45,7 +45,7 @@ export default async function PortalLayout({
       }
     }
   } catch (e) {
-    // User record doesn't exist yet
+    console.error("Error fetching profile:", e)
   }
 
   if (userData.role !== 'client') {
