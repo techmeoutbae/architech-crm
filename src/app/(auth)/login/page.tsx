@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
@@ -20,24 +20,40 @@ export default function LoginPage() {
   const [isSignUp, setIsSignUp] = useState(false)
   const [fullName, setFullName] = useState("")
   const [success, setSuccess] = useState("")
+  const [debugInfo, setDebugInfo] = useState("")
+
+  useEffect(() => {
+    // Check if user is already logged in
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        router.push("/admin/dashboard")
+      }
+    })
+  }, [router, supabase])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError("")
+    setDebugInfo("Attempting login...")
 
-    const { data, error: signInError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
+    try {
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
 
-    if (signInError) {
-      setError(signInError.message)
-      setLoading(false)
-    } else if (data.user) {
-      router.push("/admin/dashboard")
-    } else {
-      setError("Something went wrong")
+      if (signInError) {
+        setError(signInError.message)
+        setDebugInfo("Login failed: " + signInError.message)
+      } else if (data.user) {
+        setDebugInfo("Login successful, redirecting...")
+        router.push("/admin/dashboard")
+      }
+    } catch (err: any) {
+      setError(err.message || "Login failed")
+      setDebugInfo("Error: " + err.message)
+    } finally {
       setLoading(false)
     }
   }
@@ -60,17 +76,16 @@ export default function LoginPage() {
 
     if (signUpError) {
       setError(signUpError.message)
-      setLoading(false)
     } else if (data.user) {
       setSuccess("Account created! Try logging in now.")
       setIsSignUp(false)
-      setError("")
     } else if (data.session) {
       router.push("/admin/dashboard")
     } else {
-      setSuccess("Account created! Please check your email to verify, then log in.")
+      setSuccess("Account created! Check email to verify, then log in.")
       setIsSignUp(false)
     }
+    setLoading(false)
   }
 
   return (
@@ -87,7 +102,7 @@ export default function LoginPage() {
         <Card className="border-0 shadow-2xl">
           <CardHeader className="pb-4">
             <CardTitle className="text-xl">{isSignUp ? "Create Account" : "Welcome back"}</CardTitle>
-            <CardDescription>{isSignUp ? "Sign up to get started" : "Sign in to your account to continue"}</CardDescription>
+            <CardDescription>{isSignUp ? "Sign up to get started" : "Sign in to your account"}</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={isSignUp ? handleSignUp : handleLogin} className="space-y-4">
@@ -100,6 +115,12 @@ export default function LoginPage() {
               {success && (
                 <div className="p-3 rounded-lg bg-green-50 border border-green-200 text-green-600 text-sm">
                   {success}
+                </div>
+              )}
+
+              {debugInfo && (
+                <div className="p-2 rounded bg-gray-100 text-gray-600 text-xs font-mono">
+                  {debugInfo}
                 </div>
               )}
               
@@ -134,9 +155,7 @@ export default function LoginPage() {
               </div>
               
               <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="password">Password</Label>
-                </div>
+                <Label htmlFor="password">Password</Label>
                 <Input
                   id="password"
                   type="password"
@@ -153,7 +172,7 @@ export default function LoginPage() {
                 {loading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    {isSignUp ? "Creating account..." : "Signing in..."}
+                    {isSignUp ? "Creating..." : "Signing in..."}
                   </>
                 ) : (
                   isSignUp ? "Create Account" : "Sign in"
@@ -165,14 +184,14 @@ export default function LoginPage() {
               {isSignUp ? (
                 <>
                   Already have an account?{" "}
-                  <button onClick={() => { setIsSignUp(false); setError(""); setSuccess("") }} className="text-[#3B82F6] hover:underline font-medium">
+                  <button onClick={() => { setIsSignUp(false); setError(""); setSuccess(""); setDebugInfo("") }} className="text-[#3B82F6] hover:underline font-medium">
                     Sign in
                   </button>
                 </>
               ) : (
                 <>
                   Don&apos;t have an account?{" "}
-                  <button onClick={() => { setIsSignUp(true); setError(""); setSuccess("") }} className="text-[#3B82F6] hover:underline font-medium">
+                  <button onClick={() => { setIsSignUp(true); setError(""); setSuccess(""); setDebugInfo("") }} className="text-[#3B82F6] hover:underline font-medium">
                     Sign up
                   </button>
                 </>
@@ -182,7 +201,7 @@ export default function LoginPage() {
         </Card>
 
         <p className="text-center text-white/40 text-sm mt-6">
-          &copy; {new Date().getFullYear()} Architech Designs LLC. All rights reserved.
+          &copy; {new Date().getFullYear()} Architech Designs LLC
         </p>
       </div>
     </div>
