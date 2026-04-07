@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -12,79 +11,47 @@ import { Loader2 } from "lucide-react"
 
 export default function LoginPage() {
   const router = useRouter()
-  const supabase = createClient()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
-  const [isSignUp, setIsSignUp] = useState(false)
-  const [fullName, setFullName] = useState("")
-  const [success, setSuccess] = useState("")
-  const [debugInfo, setDebugInfo] = useState("")
+  const [debug, setDebug] = useState("")
+  const [supabaseUrl, setSupabaseUrl] = useState("")
 
   useEffect(() => {
-    // Check if user is already logged in
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        router.push("/admin/dashboard")
-      }
-    })
-  }, [router, supabase])
+    setSupabaseUrl(process.env.NEXT_PUBLIC_SUPABASE_URL || "NOT SET")
+  }, [])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError("")
-    setDebugInfo("Attempting login...")
+    setDebug("Starting login...")
 
-    try {
-      const { data, error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
+    const supabase = createClient()
 
-      if (signInError) {
-        setError(signInError.message)
-        setDebugInfo("Login failed: " + signInError.message)
-      } else if (data.user) {
-        setDebugInfo("Login successful, redirecting...")
-        router.push("/admin/dashboard")
-      }
-    } catch (err: any) {
-      setError(err.message || "Login failed")
-      setDebugInfo("Error: " + err.message)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setError("")
-
-    const { data, error: signUpError } = await supabase.auth.signUp({
+    setDebug("Attempting sign in...")
+    
+    const { data, error: signInError } = await supabase.auth.signInWithPassword({
       email,
       password,
-      options: {
-        data: {
-          full_name: fullName,
-          role: "admin",
-        },
-      },
     })
 
-    if (signUpError) {
-      setError(signUpError.message)
-    } else if (data.user) {
-      setSuccess("Account created! Try logging in now.")
-      setIsSignUp(false)
-    } else if (data.session) {
+    if (signInError) {
+      setError(signInError.message)
+      setDebug("Error: " + signInError.message)
+      setLoading(false)
+      return
+    }
+
+    if (data.user) {
+      setDebug("Success! User ID: " + data.user.id)
       router.push("/admin/dashboard")
     } else {
-      setSuccess("Account created! Check email to verify, then log in.")
-      setIsSignUp(false)
+      setError("No user returned")
+      setDebug("No user data")
     }
+    
     setLoading(false)
   }
 
@@ -101,42 +68,24 @@ export default function LoginPage() {
 
         <Card className="border-0 shadow-2xl">
           <CardHeader className="pb-4">
-            <CardTitle className="text-xl">{isSignUp ? "Create Account" : "Welcome back"}</CardTitle>
-            <CardDescription>{isSignUp ? "Sign up to get started" : "Sign in to your account"}</CardDescription>
+            <CardTitle className="text-xl">Welcome back</CardTitle>
+            <CardDescription>Sign in to your account</CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={isSignUp ? handleSignUp : handleLogin} className="space-y-4">
+            <div className="text-xs text-gray-400 mb-4 font-mono">
+              Supabase URL: {supabaseUrl}
+            </div>
+            
+            <form onSubmit={handleLogin} className="space-y-4">
               {error && (
                 <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-600 text-sm">
                   {error}
                 </div>
               )}
               
-              {success && (
-                <div className="p-3 rounded-lg bg-green-50 border border-green-200 text-green-600 text-sm">
-                  {success}
-                </div>
-              )}
-
-              {debugInfo && (
-                <div className="p-2 rounded bg-gray-100 text-gray-600 text-xs font-mono">
-                  {debugInfo}
-                </div>
-              )}
-              
-              {isSignUp && (
-                <div className="space-y-2">
-                  <Label htmlFor="fullName">Full Name</Label>
-                  <Input
-                    id="fullName"
-                    type="text"
-                    placeholder="Your name"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    required
-                    autoComplete="name"
-                    className="h-11"
-                  />
+              {debug && !error && (
+                <div className="p-2 rounded bg-blue-50 text-blue-600 text-xs font-mono">
+                  {debug}
                 </div>
               )}
               
@@ -163,7 +112,7 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  autoComplete={isSignUp ? "new-password" : "current-password"}
+                  autoComplete="current-password"
                   className="h-11"
                 />
               </div>
@@ -172,30 +121,16 @@ export default function LoginPage() {
                 {loading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    {isSignUp ? "Creating..." : "Signing in..."}
+                    Signing in...
                   </>
                 ) : (
-                  isSignUp ? "Create Account" : "Sign in"
+                  "Sign in"
                 )}
               </Button>
             </form>
 
             <p className="mt-6 text-center text-sm text-gray-500">
-              {isSignUp ? (
-                <>
-                  Already have an account?{" "}
-                  <button onClick={() => { setIsSignUp(false); setError(""); setSuccess(""); setDebugInfo("") }} className="text-[#3B82F6] hover:underline font-medium">
-                    Sign in
-                  </button>
-                </>
-              ) : (
-                <>
-                  Don&apos;t have an account?{" "}
-                  <button onClick={() => { setIsSignUp(true); setError(""); setSuccess(""); setDebugInfo("") }} className="text-[#3B82F6] hover:underline font-medium">
-                    Sign up
-                  </button>
-                </>
-              )}
+              Don&apos;t have an account? Contact the administrator.
             </p>
           </CardContent>
         </Card>
