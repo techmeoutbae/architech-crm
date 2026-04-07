@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { Sidebar } from "@/components/layout/sidebar"
+import { Header } from "@/components/layout/header"
 
 type UserRole = "admin" | "team" | "client"
 
@@ -11,9 +12,9 @@ export default async function DashboardLayout({
 }) {
   const supabase = await createClient()
   
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
 
-  if (!user) {
+  if (authError || !user) {
     redirect("/login")
   }
 

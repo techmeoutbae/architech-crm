@@ -26,16 +26,19 @@ export default function LoginPage() {
     setLoading(true)
     setError("")
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error: signInError } = await supabase.auth.signInWithPassword({
       email,
       password,
     })
 
-    if (error) {
-      setError(error.message)
+    if (signInError) {
+      setError(signInError.message)
       setLoading(false)
-    } else {
+    } else if (data.user) {
       router.push("/admin/dashboard")
+    } else {
+      setError("Something went wrong")
+      setLoading(false)
     }
   }
 
@@ -44,7 +47,7 @@ export default function LoginPage() {
     setLoading(true)
     setError("")
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -55,9 +58,15 @@ export default function LoginPage() {
       },
     })
 
-    if (error) {
-      setError(error.message)
+    if (signUpError) {
+      setError(signUpError.message)
       setLoading(false)
+    } else if (data.user) {
+      setSuccess("Account created! Try logging in now.")
+      setIsSignUp(false)
+      setError("")
+    } else if (data.session) {
+      router.push("/admin/dashboard")
     } else {
       setSuccess("Account created! Please check your email to verify, then log in.")
       setIsSignUp(false)
@@ -127,11 +136,6 @@ export default function LoginPage() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="password">Password</Label>
-                  {!isSignUp && (
-                    <Link href="#" className="text-sm text-[#3B82F6] hover:underline">
-                      Forgot password?
-                    </Link>
-                  )}
                 </div>
                 <Input
                   id="password"
