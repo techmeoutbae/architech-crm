@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
-import { Eye, EyeOff, Loader2, CheckCircle, AlertCircle, ArrowRight } from "lucide-react"
+import { Eye, EyeOff, Loader2, CheckCircle, AlertCircle, ArrowRight, Shield, Clock, FileText } from "lucide-react"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -13,8 +13,10 @@ export default function LoginPage() {
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
   const [showPassword, setShowPassword] = useState(false)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
     const supabase = createClient()
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) {
@@ -44,37 +46,12 @@ export default function LoginPage() {
     }
   }
 
-  const handleSignUp = async () => {
-    if (!email || !password) {
-      setError("Please enter email and password")
-      return
-    }
-    
-    setLoading(true)
-    setError("")
-    
-    const supabase = createClient()
-    
-    const { data, error: signUpError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: email.split('@')[0],
-          role: "admin",
-        },
-      },
-    })
-
-    if (signUpError) {
-      setError(signUpError.message)
-    } else if (data.user) {
-      setSuccess("Account created! You can now sign in.")
-    } else if (data.session) {
-      router.push("/admin/dashboard")
-    }
-    
-    setLoading(false)
+  if (!mounted) {
+    return (
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#F8FAFC" }}>
+        <div style={{ width: "32px", height: "32px", border: "3px solid #E2E8F0", borderTopColor: "#0A2540", borderRadius: "50%", animation: "spin 1s linear infinite" }} />
+      </div>
+    )
   }
 
   return (
@@ -84,6 +61,7 @@ export default function LoginPage() {
         <div className="auth-brand-bg">
           <div className="auth-brand-gradient" />
           <div className="auth-brand-pattern" />
+          <div className="auth-brand-glow" />
         </div>
         
         <div className="auth-brand-content">
@@ -91,35 +69,47 @@ export default function LoginPage() {
             <div className="auth-logo-icon">
               <span>AD</span>
             </div>
-            <span className="auth-logo-text">Architech Designs</span>
+            <div>
+              <span className="auth-logo-text">Architech Designs</span>
+              <span className="auth-logo-tagline">Client Portal & CRM</span>
+            </div>
           </div>
           
           <div className="auth-brand-text">
-            <p className="auth-tagline">Client Portal & CRM</p>
             <h1 className="auth-heading">Manage projects, approvals, invoices, and growth — all in one place.</h1>
             <p className="auth-description">
-              Enterprise-grade project management built for high-performance agencies and their clients.
+              Enterprise-grade project management built for high-performance agencies and their premium clients.
             </p>
           </div>
 
           <div className="auth-features">
             <div className="auth-feature">
-              <CheckCircle className="auth-feature-icon" />
-              <span>Real-time project tracking</span>
+              <div className="auth-feature-icon"><Clock size={18} /></div>
+              <div>
+                <span className="auth-feature-title">Real-time Updates</span>
+                <span className="auth-feature-desc">Track project progress instantly</span>
+              </div>
             </div>
             <div className="auth-feature">
-              <CheckCircle className="auth-feature-icon" />
-              <span>Seamless approval workflows</span>
+              <div className="auth-feature-icon"><FileText size={18} /></div>
+              <div>
+                <span className="auth-feature-title">Transparent Invoicing</span>
+                <span className="auth-feature-desc">View and pay invoices online</span>
+              </div>
             </div>
             <div className="auth-feature">
-              <CheckCircle className="auth-feature-icon" />
-              <span>Transparent invoicing</span>
+              <div className="auth-feature-icon"><Shield size={18} /></div>
+              <div>
+                <span className="auth-feature-title">Secure Access</span>
+                <span className="auth-feature-desc">Enterprise-grade security</span>
+              </div>
             </div>
           </div>
         </div>
 
         <div className="auth-brand-footer">
           <p>© {new Date().getFullYear()} Architech Designs LLC</p>
+          <p className="auth-brand-tagline-footer">Premium Client Experience</p>
         </div>
       </div>
 
@@ -135,7 +125,7 @@ export default function LoginPage() {
                 </svg>
               </div>
               <h2 className="auth-card-title">Welcome back</h2>
-              <p className="auth-card-subtitle">Sign in to your Architech Client Portal</p>
+              <p className="auth-card-subtitle">Sign in to your client portal</p>
             </div>
             
             <form onSubmit={handleLogin} className="auth-form">
@@ -154,8 +144,9 @@ export default function LoginPage() {
               )}
             
               <div className="auth-field">
-                <label className="auth-label">Email address</label>
+                <label className="auth-label" htmlFor="email">Email address</label>
                 <input
+                  id="email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -168,11 +159,11 @@ export default function LoginPage() {
             
               <div className="auth-field">
                 <div className="auth-label-row">
-                  <label className="auth-label">Password</label>
-                  <button type="button" className="auth-forgot">Forgot password?</button>
+                  <label className="auth-label" htmlFor="password">Password</label>
                 </div>
                 <div className="auth-input-wrapper">
                   <input
+                    id="password"
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -185,18 +176,22 @@ export default function LoginPage() {
                     type="button" 
                     className="auth-password-toggle"
                     onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
                   >
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
               </div>
 
-              <div className="auth-remember">
-                <label className="auth-checkbox">
-                  <input type="checkbox" />
-                  <span className="auth-checkbox-mark" />
-                  <span className="auth-checkbox-label">Remember me</span>
-                </label>
+              <div className="auth-row">
+                <div className="auth-remember">
+                  <label className="auth-checkbox">
+                    <input type="checkbox" />
+                    <span className="auth-checkbox-mark" />
+                    <span className="auth-checkbox-label">Remember me</span>
+                  </label>
+                </div>
+                <button type="button" className="auth-forgot">Forgot password?</button>
               </div>
             
               <button 
@@ -211,7 +206,7 @@ export default function LoginPage() {
                   </>
                 ) : (
                   <>
-                    Sign in
+                    Sign in to portal
                     <ArrowRight size={18} />
                   </>
                 )}
@@ -219,22 +214,34 @@ export default function LoginPage() {
             </form>
 
             <div className="auth-card-footer">
-              <p>Don&apos;t have an account?</p>
-              <button 
-                onClick={handleSignUp}
-                disabled={loading}
-                className="auth-signup-link"
-              >
-                Create account
-              </button>
+              <p>Need access? Contact your account manager or email</p>
+              <a href="mailto:support@architech.design" className="auth-support-link">
+                support@architech.design
+              </a>
             </div>
           </div>
 
-          <p className="auth-support">
-            Need access? Contact your account manager or email support@architech.design
+          <p className="auth-secure-note">
+            <Shield size={14} />
+            Secure client portal access
           </p>
         </div>
       </div>
+
+      <style jsx global>{`
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes float {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-10px); }
+        }
+      `}</style>
     </div>
   )
 }
