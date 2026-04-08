@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import Image from "next/image"
 import { createClient } from "@/lib/supabase/client"
 import { Eye, EyeOff, Loader2, CheckCircle, AlertCircle, ArrowRight, Shield, Clock, FileText } from "lucide-react"
 
@@ -66,13 +67,16 @@ export default function LoginPage() {
         
         <div className="auth-brand-content">
           <div className="auth-logo">
-            <div className="auth-logo-icon">
-              <span>AD</span>
+            <div className="auth-logo-image">
+              <Image 
+                src="/architech-logo.png" 
+                alt="Architech Designs" 
+                width={220}
+                height={60}
+                style={{ objectFit: "contain", width: "100%", height: "100%" }}
+              />
             </div>
-            <div>
-              <span className="auth-logo-text">Architech Designs</span>
-              <span className="auth-logo-tagline">Client Portal & CRM</span>
-            </div>
+            <span className="auth-logo-tagline">Client Portal & CRM</span>
           </div>
           
           <div className="auth-brand-text">

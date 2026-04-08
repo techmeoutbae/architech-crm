@@ -462,42 +462,23 @@ body {
 
 .auth-logo {
   display: flex;
-  align-items: center;
-  gap: 16px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
   margin-bottom: 56px;
 }
 
-.auth-logo-icon {
-  width: 52px;
-  height: 52px;
-  background: linear-gradient(135deg, #3B82F6 0%, #60A5FA 100%);
-  border-radius: 14px;
+.auth-logo-image {
+  width: 220px;
+  height: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8px 32px rgba(59, 130, 246, 0.35);
 }
 
-.auth-logo-icon span {
-  font-size: 17px;
-  font-weight: 800;
-  color: white;
-  letter-spacing: -0.5px;
-}
-
-.auth-logo-text {
-  font-size: 24px;
-  font-weight: 700;
-  color: white;
-  letter-spacing: -0.3px;
-  display: block;
-}
-
-.auth-logo-tagline {
-  font-size: 13px;
-  color: rgba(255,255,255,0.5);
-  display: block;
-  margin-top: 2px;
+.auth-logo-image img {
+  max-width: 100%;
+  height: auto;
 }
 
 .auth-brand-text {
