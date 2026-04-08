@@ -1,13 +1,15 @@
 "use client"
 
-import { Bell, Search, Plus } from "lucide-react"
+import { useState } from "react"
+import { Bell, Search, Plus, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { getInitials } from "@/lib/utils"
+import Link from "next/link"
 
 interface HeaderProps {
-  title: string
+  title?: string
   subtitle?: string
   user?: {
     email: string
@@ -16,66 +18,160 @@ interface HeaderProps {
     role: string
   } | null
   showSearch?: boolean
-  showAddButton?: boolean
-  addButtonLabel?: string
-  onAddClick?: () => void
+  showQuickAdd?: boolean
 }
 
-export function Header({
-  title,
-  subtitle,
-  user,
-  showSearch = false,
-  showAddButton = false,
-  addButtonLabel = "Add New",
-  onAddClick,
-}: HeaderProps) {
+const quickAddOptions = [
+  { label: "Add Lead", href: "/admin/leads" },
+  { label: "Add Client", href: "/admin/clients" },
+  { label: "New Project", href: "/admin/projects" },
+  { label: "Create Invoice", href: "/admin/invoices" },
+]
+
+export function Header({ title, subtitle, user, showSearch = true, showQuickAdd = true }: HeaderProps) {
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [quickAddOpen, setQuickAddOpen] = useState(false)
+  const [notificationsOpen, setNotificationsOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
+
   return (
-    <header className="bg-white border-b border-gray-200 px-6 py-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-gray-900">{title}</h1>
-          {subtitle && <p className="text-sm text-gray-500 mt-0.5">{subtitle}</p>}
-        </div>
+    <header className="premium-header">
+      <div className="premium-header-left">
+        {title && (
+          <div>
+            <h1 className="premium-title">{title}</h1>
+            {subtitle && <p className="premium-subtitle">{subtitle}</p>}
+          </div>
+        )}
+      </div>
 
-        <div className="flex items-center gap-4">
-          {showSearch && (
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                placeholder="Search..."
-                className="w-64 pl-9 bg-gray-50 border-gray-200"
-              />
-            </div>
-          )}
-
-          {showAddButton && (
-            <Button onClick={onAddClick} className="gap-2">
-              <Plus className="h-4 w-4" />
-              {addButtonLabel}
-            </Button>
-          )}
-
-          <Button variant="ghost" size="icon" className="relative">
-            <Bell className="h-5 w-5 text-gray-600" />
-            <span className="absolute top-1 right-1 w-2 h-2 bg-[#3B82F6] rounded-full" />
-          </Button>
-
-          {user && (
-            <div className="flex items-center gap-3 pl-4 border-l border-gray-200">
-              <Avatar className="h-8 w-8">
-                <AvatarImage src={user.avatar_url || ""} />
-                <AvatarFallback className="bg-[#0A2540] text-white text-xs">
-                  {getInitials(user.full_name || user.email)}
-                </AvatarFallback>
-              </Avatar>
-              <div className="hidden md:block">
-                <p className="text-sm font-medium text-gray-900">{user.full_name || "User"}</p>
-                <p className="text-xs text-gray-500 capitalize">{user.role}</p>
+      <div className="premium-header-right">
+        {/* Search */}
+        {showSearch && (
+          <div className="premium-search-wrapper">
+            {searchOpen ? (
+              <div className="premium-search-expanded">
+                <Search className="premium-search-icon" size={18} />
+                <input
+                  type="text"
+                  placeholder="Search leads, clients, projects..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="premium-search-input"
+                  autoFocus
+                />
+                <button 
+                  onClick={() => setSearchOpen(false)}
+                  className="premium-search-close"
+                >
+                  <X size={16} />
+                </button>
               </div>
-            </div>
+            ) : (
+              <button 
+                onClick={() => setSearchOpen(true)}
+                className="premium-search-btn"
+              >
+                <Search size={18} />
+                <span className="premium-search-text">Search</span>
+                <span className="premium-search-shortcut">⌘K</span>
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Quick Add */}
+        {showQuickAdd && (
+          <div className="premium-quick-add-wrapper">
+            <button 
+              onClick={() => setQuickAddOpen(!quickAddOpen)}
+              className="premium-quick-add-btn"
+            >
+              <Plus size={18} />
+              <span>Add New</span>
+            </button>
+            
+            {quickAddOpen && (
+              <>
+                <div 
+                  className="premium-dropdown-overlay"
+                  onClick={() => setQuickAddOpen(false)}
+                />
+                <div className="premium-quick-add-dropdown">
+                  <div className="premium-dropdown-header">Quick Actions</div>
+                  {quickAddOptions.map((option) => (
+                    <Link
+                      key={option.href}
+                      href={option.href}
+                      className="premium-dropdown-item"
+                      onClick={() => setQuickAddOpen(false)}
+                    >
+                      {option.label}
+                    </Link>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Notifications */}
+        <div className="premium-notifications-wrapper">
+          <button 
+            onClick={() => setNotificationsOpen(!notificationsOpen)}
+            className="premium-notifications-btn"
+          >
+            <Bell size={18} />
+            <span className="premium-notifications-badge">3</span>
+          </button>
+          
+          {notificationsOpen && (
+            <>
+              <div 
+                className="premium-dropdown-overlay"
+                onClick={() => setNotificationsOpen(false)}
+              />
+              <div className="premium-notifications-dropdown">
+                <div className="premium-dropdown-header">
+                  <span>Notifications</span>
+                  <button className="premium-dropdown-mark-read">Mark all read</button>
+                </div>
+                <div className="premium-notifications-list">
+                  <div className="premium-notification-item unread">
+                    <div className="premium-notification-dot" />
+                    <div className="premium-notification-content">
+                      <p className="premium-notification-title">New lead added</p>
+                      <p className="premium-notification-desc">Acme Corp was added to leads</p>
+                      <p className="premium-notification-time">2 minutes ago</p>
+                    </div>
+                  </div>
+                  <div className="premium-notification-item unread">
+                    <div className="premium-notification-dot" />
+                    <div className="premium-notification-content">
+                      <p className="premium-notification-title">Invoice paid</p>
+                      <p className="premium-notification-desc">INV-0004 payment received</p>
+                      <p className="premium-notification-time">1 hour ago</p>
+                    </div>
+                  </div>
+                  <div className="premium-notification-item">
+                    <div className="premium-notification-content">
+                      <p className="premium-notification-title">Project milestone</p>
+                      <p className="premium-notification-desc">Website Redesign reached 50%</p>
+                      <p className="premium-notification-time">3 hours ago</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </>
           )}
         </div>
+
+        {/* User Avatar */}
+        {user && (
+          <div className="premium-user-avatar">
+            {getInitials(user.full_name || user.email)}
+          </div>
+        )}
       </div>
     </header>
   )
