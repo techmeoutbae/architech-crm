@@ -114,69 +114,67 @@ export default async function AdminDashboardPage() {
   return (
     <>
       {/* Page Header */}
-      <header style={{ background: "white", padding: "20px 24px", borderBottom: "1px solid #E2E8F0" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <div>
-            <h1 style={{ fontSize: "22px", fontWeight: "600", color: "#0F172A" }}>Dashboard</h1>
-            <p style={{ fontSize: "13px", color: "#64748B", marginTop: "2px" }}>Welcome back! Here&apos;s your agency overview.</p>
-          </div>
-          <div style={{ display: "flex", gap: "12px" }}>
-            <Link href="/admin/leads" style={{ padding: "10px 20px", background: "white", border: "1px solid #E2E8F0", borderRadius: "8px", fontWeight: "500", fontSize: "14px", color: "#0A2540", textDecoration: "none", display: "flex", alignItems: "center", gap: "8px" }}>
-              <Plus style={{ width: "16px", height: "16px" }} /> Add Lead
-            </Link>
-            <Link href="/admin/projects/new" style={{ padding: "10px 20px", background: "#0A2540", borderRadius: "8px", fontWeight: "500", fontSize: "14px", color: "white", textDecoration: "none", display: "flex", alignItems: "center", gap: "8px" }}>
-              <Plus style={{ width: "16px", height: "16px" }} /> New Project
-            </Link>
-          </div>
+      <header className="page-header">
+        <div className="page-header-left">
+          <h1 className="page-title">Dashboard</h1>
+          <p className="page-subtitle">Welcome back! Here&apos;s your agency overview.</p>
+        </div>
+        <div className="page-header-actions">
+          <Link href="/admin/leads" className="btn-premium btn-premium-secondary">
+            <Plus style={{ width: "16px", height: "16px" }} /> Add Lead
+          </Link>
+          <Link href="/admin/projects" className="btn-premium">
+            <Plus style={{ width: "16px", height: "16px" }} /> New Project
+          </Link>
         </div>
       </header>
       
       {/* Content */}
-      <div style={{ flex: 1, overflow: "auto", padding: "24px" }}>
+      <div className="dashboard-content">
         
         {/* Stats Grid */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "20px", marginBottom: "32px" }}>
-          <div className="stats-card">
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
-              <div style={{ width: "44px", height: "44px", background: "#DBEAFE", borderRadius: "10px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <Users style={{ width: "22px", height: "22px", color: "#3B82F6" }} />
+        <div className="stats-grid">
+          <div className="stats-card-premium">
+            <div className="stats-card-header">
+              <div className="stats-card-icon blue">
+                <Users style={{ width: "22px", height: "22px" }} />
               </div>
             </div>
-            <div className="stats-value">{stats.activeLeads}</div>
-            <div className="stats-label">Active Leads</div>
+            <div className="stats-card-value">{stats.activeLeads}</div>
+            <div className="stats-card-label">Active Leads</div>
             <div style={{ fontSize: "12px", color: "#64748B", marginTop: "8px" }}>of {stats.totalLeads} total</div>
           </div>
 
-          <div className="stats-card">
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
-              <div style={{ width: "44px", height: "44px", background: "#D1FAE5", borderRadius: "10px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <Building2 style={{ width: "22px", height: "22px", color: "#10B981" }} />
+          <div className="stats-card-premium">
+            <div className="stats-card-header">
+              <div className="stats-card-icon green">
+                <Building2 style={{ width: "22px", height: "22px" }} />
               </div>
             </div>
-            <div className="stats-value">{stats.activeClients}</div>
-            <div className="stats-label">Active Clients</div>
+            <div className="stats-card-value">{stats.activeClients}</div>
+            <div className="stats-card-label">Active Clients</div>
             <div style={{ fontSize: "12px", color: "#64748B", marginTop: "8px" }}>of {stats.totalClients} total</div>
           </div>
 
-          <div className="stats-card">
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
-              <div style={{ width: "44px", height: "44px", background: "#EDE9FE", borderRadius: "10px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <FolderKanban style={{ width: "22px", height: "22px", color: "#8B5CF6" }} />
+          <div className="stats-card-premium">
+            <div className="stats-card-header">
+              <div className="stats-card-icon purple">
+                <FolderKanban style={{ width: "22px", height: "22px" }} />
               </div>
             </div>
-            <div className="stats-value">{stats.activeProjects}</div>
-            <div className="stats-label">Active Projects</div>
+            <div className="stats-card-value">{stats.activeProjects}</div>
+            <div className="stats-card-label">Active Projects</div>
             <div style={{ fontSize: "12px", color: "#64748B", marginTop: "8px" }}>{stats.completedProjects} completed</div>
           </div>
 
-          <div className="stats-card">
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
-              <div style={{ width: "44px", height: "44px", background: "#FEF3C7", borderRadius: "10px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <DollarSign style={{ width: "22px", height: "22px", color: "#F59E0B" }} />
+          <div className="stats-card-premium">
+            <div className="stats-card-header">
+              <div className="stats-card-icon orange">
+                <DollarSign style={{ width: "22px", height: "22px" }} />
               </div>
             </div>
-            <div className="stats-value">{formatCurrency(stats.totalRevenue)}</div>
-            <div className="stats-label">Total Revenue</div>
+            <div className="stats-card-value">{formatCurrency(stats.totalRevenue)}</div>
+            <div className="stats-card-label">Total Revenue</div>
             <div style={{ fontSize: "12px", color: stats.unpaidInvoices > 0 ? "#DC2626" : "#64748B", marginTop: "8px" }}>
               {stats.unpaidInvoices > 0 ? `${stats.unpaidInvoices} unpaid invoices` : 'All paid'}
             </div>
@@ -184,42 +182,40 @@ export default async function AdminDashboardPage() {
         </div>
 
         {/* Main Content Grid */}
-        <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "24px" }}>
+        <div className="activity-grid">
           
           {/* Active Projects */}
-          <div className="card-premium" style={{ padding: "20px" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" }}>
-              <h2 style={{ fontSize: "16px", fontWeight: "600", color: "#0F172A" }}>Active Projects</h2>
-              <Link href="/admin/projects" style={{ fontSize: "13px", color: "#3B82F6", fontWeight: "500", textDecoration: "none", display: "flex", alignItems: "center", gap: "4px" }}>
+          <div className="activity-card">
+            <div className="section-header" style={{ padding: "20px 24px" }}>
+              <h2 className="section-title">Active Projects</h2>
+              <Link href="/admin/projects" className="section-action">
                 View all <ArrowRight style={{ width: "14px", height: "14px" }} />
               </Link>
             </div>
             
             {activeProjects.length === 0 ? (
-              <div className="empty-state" style={{ padding: "32px" }}>
-                <div className="empty-state-icon">
-                  <FolderKanban style={{ width: "28px", height: "28px" }} />
+              <div className="empty-state-premium">
+                <div className="empty-state-icon-premium">
+                  <FolderKanban style={{ width: "32px", height: "32px" }} />
                 </div>
-                <div className="empty-state-title">No active projects</div>
-                <div className="empty-state-description">Create your first project to get started</div>
+                <div className="empty-state-title-premium">No active projects</div>
+                <div className="empty-state-desc-premium">Create your first project to get started</div>
               </div>
             ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+              <div className="activity-list">
                 {activeProjects.map((project: any) => (
                   <Link key={project.id} href={`/admin/projects/${project.id}`} style={{ textDecoration: "none" }}>
-                    <div style={{ padding: "16px", background: "#F8FAFC", borderRadius: "10px", border: "1px solid #E2E8F0", transition: "all 0.2s", cursor: "pointer" }}>
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
-                        <span style={{ fontWeight: "600", color: "#0F172A", fontSize: "14px" }}>{project.name}</span>
-                        <span className={`badge ${getProjectStatusClass(project.status)}`}>{formatStatus(project.status)}</span>
+                    <div className="activity-item">
+                      <div className="activity-icon" style={{ background: "#EDE9FE", color: "#8B5CF6" }}>
+                        <FolderKanban style={{ width: "18px", height: "18px" }} />
                       </div>
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                        <span style={{ fontSize: "13px", color: "#64748B" }}>{project.client?.business_name || 'No client'}</span>
-                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                          <div className="progress-premium" style={{ width: "80px" }}>
-                            <div className="progress-premium-bar" style={{ width: `${project.progress_percentage || 0}%` }} />
-                          </div>
-                          <span style={{ fontSize: "12px", color: "#64748B" }}>{project.progress_percentage || 0}%</span>
-                        </div>
+                      <div className="activity-content">
+                        <div className="activity-title">{project.name}</div>
+                        <div className="activity-desc">{project.client?.business_name || 'No client'}</div>
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                        <span className={`badge ${getProjectStatusClass(project.status)}`}>{formatStatus(project.status)}</span>
+                        <span style={{ fontSize: "12px", color: "#64748B" }}>{project.progress_percentage || 0}%</span>
                       </div>
                     </div>
                   </Link>
@@ -229,33 +225,33 @@ export default async function AdminDashboardPage() {
           </div>
 
           {/* Recent Leads */}
-          <div className="card-premium" style={{ padding: "20px" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" }}>
-              <h2 style={{ fontSize: "16px", fontWeight: "600", color: "#0F172A" }}>Recent Leads</h2>
-              <Link href="/admin/leads" style={{ fontSize: "13px", color: "#3B82F6", fontWeight: "500", textDecoration: "none", display: "flex", alignItems: "center", gap: "4px" }}>
+          <div className="activity-card">
+            <div className="section-header" style={{ padding: "20px 24px" }}>
+              <h2 className="section-title">Recent Leads</h2>
+              <Link href="/admin/leads" className="section-action">
                 View all <ArrowRight style={{ width: "14px", height: "14px" }} />
               </Link>
             </div>
             
             {recentLeads.length === 0 ? (
-              <div className="empty-state" style={{ padding: "32px" }}>
-                <div className="empty-state-icon">
-                  <Users style={{ width: "28px", height: "28px" }} />
+              <div className="empty-state-premium">
+                <div className="empty-state-icon-premium">
+                  <Users style={{ width: "32px", height: "32px" }} />
                 </div>
-                <div className="empty-state-title">No leads yet</div>
-                <div className="empty-state-description">Leads will appear here</div>
+                <div className="empty-state-title-premium">No leads yet</div>
+                <div className="empty-state-desc-premium">Leads will appear here</div>
               </div>
             ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+              <div className="activity-list">
                 {recentLeads.map((lead: any) => (
                   <Link key={lead.id} href={`/admin/leads/${lead.id}`} style={{ textDecoration: "none" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "12px", padding: "12px", background: "#F8FAFC", borderRadius: "8px", border: "1px solid #E2E8F0", transition: "all 0.2s" }}>
-                      <div style={{ width: "40px", height: "40px", background: "linear-gradient(135deg, #3B82F6, #60A5FA)", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: "600", fontSize: "14px" }}>
+                    <div className="activity-item">
+                      <div style={{ width: "40px", height: "40px", background: "linear-gradient(135deg, #3B82F6, #60A5FA)", borderRadius: "10px", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: "600", fontSize: "14px", flexShrink: 0 }}>
                         {lead.business_name?.charAt(0) || 'L'}
                       </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontWeight: "500", color: "#0F172A", fontSize: "14px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{lead.business_name}</div>
-                        <div style={{ fontSize: "12px", color: "#64748B" }}>{lead.email}</div>
+                      <div className="activity-content">
+                        <div className="activity-title">{lead.business_name}</div>
+                        <div className="activity-desc">{lead.email}</div>
                       </div>
                       <span className={`badge ${getLeadStatusClass(lead.status)}`}>{formatStatus(lead.status)}</span>
                     </div>
@@ -268,31 +264,23 @@ export default async function AdminDashboardPage() {
 
         {/* Quick Actions */}
         <div style={{ marginTop: "32px" }}>
-          <h2 style={{ fontSize: "16px", fontWeight: "600", color: "#0F172A", marginBottom: "16px" }}>Quick Actions</h2>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "16px" }}>
-            <Link href="/admin/leads" style={{ textDecoration: "none" }}>
-              <div style={{ padding: "20px", background: "white", borderRadius: "12px", border: "1px solid #E2E8F0", textAlign: "center", transition: "all 0.2s" }}>
-                <Users style={{ width: "24px", height: "24px", color: "#3B82F6", margin: "0 auto 12px" }} />
-                <span style={{ fontSize: "14px", fontWeight: "500", color: "#0F172A" }}>Add Lead</span>
-              </div>
+          <h2 className="section-title" style={{ marginBottom: "20px" }}>Quick Actions</h2>
+          <div className="quick-actions-list" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "16px" }}>
+            <Link href="/admin/leads" className="quick-action-btn">
+              <Users className="quick-action-icon" />
+              Add Lead
             </Link>
-            <Link href="/admin/clients" style={{ textDecoration: "none" }}>
-              <div style={{ padding: "20px", background: "white", borderRadius: "12px", border: "1px solid #E2E8F0", textAlign: "center", transition: "all 0.2s" }}>
-                <Building2 style={{ width: "24px", height: "24px", color: "#10B981", margin: "0 auto 12px" }} />
-                <span style={{ fontSize: "14px", fontWeight: "500", color: "#0F172A" }}>Add Client</span>
-              </div>
+            <Link href="/admin/clients" className="quick-action-btn">
+              <Building2 className="quick-action-icon" />
+              Add Client
             </Link>
-            <Link href="/admin/projects" style={{ textDecoration: "none" }}>
-              <div style={{ padding: "20px", background: "white", borderRadius: "12px", border: "1px solid #E2E8F0", textAlign: "center", transition: "all 0.2s" }}>
-                <FolderKanban style={{ width: "24px", height: "24px", color: "#8B5CF6", margin: "0 auto 12px" }} />
-                <span style={{ fontSize: "14px", fontWeight: "500", color: "#0F172A" }}>New Project</span>
-              </div>
+            <Link href="/admin/projects" className="quick-action-btn">
+              <FolderKanban className="quick-action-icon" />
+              New Project
             </Link>
-            <Link href="/admin/invoices" style={{ textDecoration: "none" }}>
-              <div style={{ padding: "20px", background: "white", borderRadius: "12px", border: "1px solid #E2E8F0", textAlign: "center", transition: "all 0.2s" }}>
-                <FileText style={{ width: "24px", height: "24px", color: "#F59E0B", margin: "0 auto 12px" }} />
-                <span style={{ fontSize: "14px", fontWeight: "500", color: "#0F172A" }}>Create Invoice</span>
-              </div>
+            <Link href="/admin/invoices" className="quick-action-btn">
+              <FileText className="quick-action-icon" />
+              Create Invoice
             </Link>
           </div>
         </div>

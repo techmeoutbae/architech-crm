@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname, useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import {
@@ -13,7 +14,10 @@ import {
   Building2,
   MessageSquare,
   LogOut,
+  Menu,
+  X,
 } from "lucide-react"
+import { useState } from "react"
 
 interface SidebarProps {
   user?: {
@@ -27,6 +31,7 @@ interface SidebarProps {
 export function Sidebar({ user }: SidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
+  const [mobileOpen, setMobileOpen] = useState(false)
   
   const isAdmin = user?.role === 'admin' || user?.role === 'team'
   const links = isAdmin ? [
@@ -60,12 +65,27 @@ export function Sidebar({ user }: SidebarProps) {
       .slice(0, 2)
   }
 
-  return (
-    <div style={{ width: "260px", background: "#0A2540", height: "100vh", padding: "20px 16px", display: "flex", flexDirection: "column" }}>
+  const SidebarContent = ({ mobile = false }: { mobile?: boolean }) => (
+    <div style={{ width: mobile ? "280px" : "260px", background: "#0A2540", height: "100vh", padding: "20px 16px", display: "flex", flexDirection: "column" }}>
+      {mobile && (
+        <button 
+          onClick={() => setMobileOpen(false)}
+          style={{ position: "absolute", top: "16px", right: "16px", background: "none", border: "none", color: "white", cursor: "pointer", padding: "8px" }}
+        >
+          <X size={24} />
+        </button>
+      )}
+      
       {/* Logo */}
       <div style={{ display: "flex", alignItems: "center", gap: "12px", padding: "8px 12px", marginBottom: "24px" }}>
-        <div style={{ width: "36px", height: "36px", background: "#3B82F6", borderRadius: "10px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <span style={{ fontSize: "14px", fontWeight: "700", color: "white" }}>AD</span>
+        <div style={{ width: "40px", height: "40px", borderRadius: "10px", overflow: "hidden", position: "relative" }}>
+          <Image 
+            src="/architech-logo.png" 
+            alt="Architech Designs" 
+            width={40}
+            height={40}
+            style={{ objectFit: "contain" }}
+          />
         </div>
         <span style={{ color: "white", fontWeight: "600", fontSize: "18px" }}>Architech</span>
       </div>
@@ -79,6 +99,7 @@ export function Sidebar({ user }: SidebarProps) {
             <Link
               key={link.href}
               href={link.href}
+              onClick={() => mobile && setMobileOpen(false)}
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -126,5 +147,73 @@ export function Sidebar({ user }: SidebarProps) {
         </button>
       </div>
     </div>
+  )
+
+  return (
+    <>
+      {/* Mobile menu button */}
+      <button 
+        onClick={() => setMobileOpen(true)}
+        style={{
+          display: "none",
+          position: "fixed",
+          top: "16px",
+          left: "16px",
+          zIndex: "100",
+          padding: "10px",
+          background: "#0A2540",
+          border: "none",
+          borderRadius: "8px",
+          color: "white",
+          cursor: "pointer",
+        }}
+        className="mobile-menu-btn"
+      >
+        <Menu size={24} />
+      </button>
+
+      {/* Desktop sidebar */}
+      <div className="desktop-sidebar">
+        <SidebarContent />
+      </div>
+
+      {/* Mobile overlay */}
+      {mobileOpen && (
+        <div 
+          onClick={() => setMobileOpen(false)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.5)",
+            zIndex: "1000",
+          }}
+        />
+      )}
+      
+      {/* Mobile sidebar */}
+      <div className={`mobile-sidebar ${mobileOpen ? 'open' : ''}`}>
+        <SidebarContent mobile />
+      </div>
+
+      <style jsx>{`
+        .desktop-sidebar { display: flex; }
+        .mobile-menu-btn { display: none; }
+        .mobile-sidebar { 
+          display: none; 
+          position: fixed; 
+          left: -280px; 
+          top: 0; 
+          z-index: 1001;
+          transition: left 0.3s ease;
+        }
+        .mobile-sidebar.open { left: 0; }
+        
+        @media (max-width: 1024px) {
+          .desktop-sidebar { display: none; }
+          .mobile-menu-btn { display: flex; }
+          .mobile-sidebar { display: block; }
+        }
+      `}</style>
+    </>
   )
 }
