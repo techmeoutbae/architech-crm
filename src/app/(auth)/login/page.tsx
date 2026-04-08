@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
+import { Eye, EyeOff, Loader2, CheckCircle, AlertCircle, ArrowRight } from "lucide-react"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -11,6 +12,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
 
   useEffect(() => {
     const supabase = createClient()
@@ -36,11 +38,10 @@ export default function LoginPage() {
 
     if (signInError) {
       setError(signInError.message)
+      setLoading(false)
     } else if (data.user) {
       router.push("/admin/dashboard")
     }
-    
-    setLoading(false)
   }
 
   const handleSignUp = async () => {
@@ -77,110 +78,162 @@ export default function LoginPage() {
   }
 
   return (
-    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "linear-gradient(135deg, #0A2540 0%, #1E3A5F 50%, #0A2540 100%)", padding: "20px" }}>
-      <div style={{ width: "100%", maxWidth: "420px" }}>
+    <div className="auth-container">
+      {/* Left Side - Brand Section */}
+      <div className="auth-brand-section">
+        <div className="auth-brand-bg">
+          <div className="auth-brand-gradient" />
+          <div className="auth-brand-pattern" />
+        </div>
         
-        {/* Logo Section */}
-        <div style={{ textAlign: "center", marginBottom: "32px" }}>
-          <div style={{ width: "64px", height: "64px", background: "linear-gradient(135deg, #3B82F6, #60A5FA)", borderRadius: "16px", display: "inline-flex", alignItems: "center", justifyContent: "center", marginBottom: "20px", boxShadow: "0 8px 32px rgba(59, 130, 246, 0.4)" }}>
-            <span style={{ fontSize: "24px", fontWeight: "800", color: "white", letterSpacing: "-1px" }}>AD</span>
+        <div className="auth-brand-content">
+          <div className="auth-logo">
+            <div className="auth-logo-icon">
+              <span>AD</span>
+            </div>
+            <span className="auth-logo-text">Architech Designs</span>
           </div>
-          <h1 style={{ fontSize: "28px", fontWeight: "700", color: "white", marginBottom: "8px", letterSpacing: "-0.5px" }}>Architech Designs</h1>
-          <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "15px" }}>Client Portal & Operations CRM</p>
+          
+          <div className="auth-brand-text">
+            <p className="auth-tagline">Client Portal & CRM</p>
+            <h1 className="auth-heading">Manage projects, approvals, invoices, and growth — all in one place.</h1>
+            <p className="auth-description">
+              Enterprise-grade project management built for high-performance agencies and their clients.
+            </p>
+          </div>
+
+          <div className="auth-features">
+            <div className="auth-feature">
+              <CheckCircle className="auth-feature-icon" />
+              <span>Real-time project tracking</span>
+            </div>
+            <div className="auth-feature">
+              <CheckCircle className="auth-feature-icon" />
+              <span>Seamless approval workflows</span>
+            </div>
+            <div className="auth-feature">
+              <CheckCircle className="auth-feature-icon" />
+              <span>Transparent invoicing</span>
+            </div>
+          </div>
         </div>
 
-        {/* Login Card */}
-        <div style={{ background: "white", borderRadius: "16px", boxShadow: "0 25px 50px -12px rgba(0,0,0,0.4)", padding: "32px" }}>
-          <h2 style={{ fontSize: "20px", fontWeight: "600", color: "#0F172A", marginBottom: "24px", textAlign: "center" }}>Sign in to your account</h2>
-          
-          <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-            {error && (
-              <div style={{ padding: "12px 16px", background: "#FEF2F2", borderRadius: "8px", color: "#DC2626", fontSize: "14px", border: "1px solid #FECACA" }}>
-                {error}
+        <div className="auth-brand-footer">
+          <p>© {new Date().getFullYear()} Architech Designs LLC</p>
+        </div>
+      </div>
+
+      {/* Right Side - Login Card */}
+      <div className="auth-form-section">
+        <div className="auth-card-wrapper">
+          <div className="auth-card">
+            <div className="auth-card-header">
+              <div className="auth-card-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                  <rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" strokeWidth="2"/>
+                  <path d="M7 11V7a5 5 0 0110 0v4" stroke="currentColor" strokeWidth="2"/>
+                </svg>
               </div>
-            )}
+              <h2 className="auth-card-title">Welcome back</h2>
+              <p className="auth-card-subtitle">Sign in to your Architech Client Portal</p>
+            </div>
             
-            {success && (
-              <div style={{ padding: "12px 16px", background: "#ECFDF5", borderRadius: "8px", color: "#059669", fontSize: "14px", border: "1px solid #A7F3D0" }}>
-                {success}
-              </div>
-            )}
-          
-            <div>
-              <label style={{ display: "block", fontSize: "14px", fontWeight: "500", color: "#374151", marginBottom: "6px" }}>Email address</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                placeholder="you@company.com"
-                style={{ width: "100%", padding: "12px 16px", border: "1px solid #E2E8F0", borderRadius: "10px", fontSize: "15px", transition: "all 0.2s" }}
-              />
-            </div>
-          
-            <div>
-              <label style={{ display: "block", fontSize: "14px", fontWeight: "500", color: "#374151", marginBottom: "6px" }}>Password</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                placeholder="Enter your password"
-                style={{ width: "100%", padding: "12px 16px", border: "1px solid #E2E8F0", borderRadius: "10px", fontSize: "15px", transition: "all 0.2s" }}
-              />
-            </div>
-
-            <button 
-              type="submit" 
-              disabled={loading}
-              style={{ 
-                width: "100%", 
-                padding: "14px", 
-                background: loading ? "#1E3A5F" : "#0A2540", 
-                color: "white", 
-                borderRadius: "10px", 
-                fontWeight: "600", 
-                fontSize: "15px", 
-                cursor: loading ? "not-allowed" : "pointer", 
-                border: "none",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "8px",
-                marginTop: "8px"
-              }}
-            >
-              {loading ? (
-                <>
-                  <svg style={{ animation: "spin 1s linear infinite", width: "18px", height: "18px" }} viewBox="0 0 24 24" fill="none">
-                    <circle style={{ opacity: "0.25" }} cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path style={{ opacity: "0.75" }} fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                  </svg>
-                  Signing in...
-                </>
-              ) : (
-                "Sign in"
+            <form onSubmit={handleLogin} className="auth-form">
+              {error && (
+                <div className="auth-error">
+                  <AlertCircle className="auth-error-icon" />
+                  <span>{error}</span>
+                </div>
               )}
-            </button>
-          </form>
+              
+              {success && (
+                <div className="auth-success">
+                  <CheckCircle className="auth-success-icon" />
+                  <span>{success}</span>
+                </div>
+              )}
+            
+              <div className="auth-field">
+                <label className="auth-label">Email address</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  placeholder="you@company.com"
+                  className="auth-input"
+                  autoComplete="email"
+                />
+              </div>
+            
+              <div className="auth-field">
+                <div className="auth-label-row">
+                  <label className="auth-label">Password</label>
+                  <button type="button" className="auth-forgot">Forgot password?</button>
+                </div>
+                <div className="auth-input-wrapper">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    placeholder="Enter your password"
+                    className="auth-input auth-input-password"
+                    autoComplete="current-password"
+                  />
+                  <button 
+                    type="button" 
+                    className="auth-password-toggle"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+              </div>
 
-          <div style={{ marginTop: "24px", paddingTop: "24px", borderTop: "1px solid #E2E8F0" }}>
-            <p style={{ textAlign: "center", fontSize: "13px", color: "#64748B" }}>
-              Don&apos;t have an account?{" "}
+              <div className="auth-remember">
+                <label className="auth-checkbox">
+                  <input type="checkbox" />
+                  <span className="auth-checkbox-mark" />
+                  <span className="auth-checkbox-label">Remember me</span>
+                </label>
+              </div>
+            
+              <button 
+                type="submit" 
+                disabled={loading}
+                className="auth-submit"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="auth-spinner" />
+                    Signing in...
+                  </>
+                ) : (
+                  <>
+                    Sign in
+                    <ArrowRight size={18} />
+                  </>
+                )}
+              </button>
+            </form>
+
+            <div className="auth-card-footer">
+              <p>Don&apos;t have an account?</p>
               <button 
                 onClick={handleSignUp}
                 disabled={loading}
-                style={{ background: "none", border: "none", color: "#3B82F6", fontWeight: "600", cursor: "pointer", fontSize: "13px" }}
+                className="auth-signup-link"
               >
                 Create account
               </button>
-            </p>
+            </div>
           </div>
-        </div>
 
-        <p style={{ textAlign: "center", color: "rgba(255,255,255,0.4)", fontSize: "13px", marginTop: "24px" }}>
-          © {new Date().getFullYear()} Architech Designs LLC. All rights reserved.
-        </p>
+          <p className="auth-support">
+            Need access? Contact your account manager or email support@architech.design
+          </p>
+        </div>
       </div>
     </div>
   )
