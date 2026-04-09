@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { Sidebar } from "@/components/layout/sidebar"
+import { normalizeUserRole } from "@/lib/auth"
 
 type UserRole = "admin" | "team" | "client"
 
@@ -26,7 +27,7 @@ export default async function PortalLayout({
     email: user.email || "",
     full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || null,
     avatar_url: user.user_metadata?.avatar_url || null,
-    role: "client",
+    role: normalizeUserRole(user.user_metadata?.role) as UserRole,
   }
 
   try {
@@ -41,10 +42,10 @@ export default async function PortalLayout({
         email: profile.email || user.email || "",
         full_name: profile.full_name,
         avatar_url: profile.avatar_url,
-        role: (profile.role as UserRole) || "client",
+        role: normalizeUserRole(profile.role) as UserRole,
       }
     }
-  } catch (e) {
+  } catch {
     // Silent fail - use defaults
   }
 
@@ -53,9 +54,9 @@ export default async function PortalLayout({
   }
 
   return (
-    <div style={{ display: "flex", height: "100vh", background: "#F8FAFC" }}>
+    <div className="flex min-h-screen bg-[radial-gradient(circle_at_top,_rgba(147,197,253,0.16),_transparent_28%),linear-gradient(180deg,#f6f9fd_0%,#eef4fb_100%)]">
       <Sidebar user={userData} />
-      <main style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+      <main className="min-w-0 flex-1 overflow-hidden pb-28 lg:pb-0">
         {children}
       </main>
     </div>

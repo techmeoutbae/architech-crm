@@ -1,7 +1,8 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-sans: var(--font-manrope), "Segoe UI", sans-serif;
+  --font-mono: var(--font-ibm-plex-mono), "SFMono-Regular", monospace;
   
   --color-primary: #0A2540;
   --color-primary-light: #1E3A5F;
@@ -17,13 +18,14 @@
 }
 
 :root {
-  --background: #F8FAFC;
+  --background: #F5F8FC;
   --foreground: #0F172A;
   --arch-blue: #0A2540;
   --arch-blue-light: #1E3A5F;
   --arch-blue-accent: #3B82F6;
   --arch-silver: #94A3B8;
   --arch-silver-light: #CBD5E1;
+  --arch-border: rgba(148, 163, 184, 0.28);
   --arch-white: #FFFFFF;
   --arch-success: #10B981;
   --arch-warning: #F59E0B;
@@ -35,11 +37,33 @@
 }
 
 body {
-  background: var(--background);
+  min-height: 100vh;
+  background: linear-gradient(180deg, #f5f8fc 0%, #eef4fb 100%);
   color: var(--foreground);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: rgba(59, 130, 246, 0.2);
+  color: #08213d;
+}
+
+a {
+  color: inherit;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Premium card */
