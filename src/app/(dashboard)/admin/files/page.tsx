@@ -67,7 +67,13 @@ export default async function FilesPage() {
 
   return (
     <>
-      <Header title="Files" subtitle="Manage documents and assets" user={userData} showSearch showAddButton addButtonLabel="Upload File" />
+      <Header
+        title="Files"
+        subtitle="Manage documents and assets"
+        user={userData}
+        showSearch
+        showQuickAdd
+      />
       
       <div className="flex-1 overflow-auto p-6">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">

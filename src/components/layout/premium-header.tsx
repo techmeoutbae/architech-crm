@@ -24,6 +24,8 @@ interface HeaderProps {
   } | null
   showSearch?: boolean
   showQuickAdd?: boolean
+  showAddButton?: boolean
+  addButtonLabel?: string
 }
 
 interface QuickLink {
@@ -63,6 +65,7 @@ export function Header({
   user,
   showSearch = true,
   showQuickAdd = true,
+  showAddButton = false,
 }: HeaderProps) {
   const router = useRouter()
   const [searchQuery, setSearchQuery] = useState("")
@@ -71,6 +74,7 @@ export function Header({
   const deferredSearchQuery = useDeferredValue(searchQuery)
 
   const isClient = user?.role === "client"
+  const shouldShowQuickAdd = showQuickAdd || showAddButton
   const quickLinks = isClient ? portalQuickLinks : adminQuickLinks
   const normalizedQuery = deferredSearchQuery.trim().toLowerCase()
   const filteredLinks = normalizedQuery
@@ -166,7 +170,7 @@ export function Header({
             </a>
           </Button>
 
-          {!isClient && showQuickAdd ? (
+          {!isClient && shouldShowQuickAdd ? (
             <div className="relative">
               <Button type="button" onClick={() => setQuickAddOpen((current) => !current)}>
                 <Plus className="h-4 w-4" />
