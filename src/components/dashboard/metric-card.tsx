@@ -58,23 +58,23 @@ export function MetricCard({
   return (
     <Card className="group overflow-hidden">
       <CardContent className="p-0">
-        <div className={cn("bg-gradient-to-br p-5 sm:p-6", styles.accent)}>
+        <div className={cn("bg-gradient-to-br p-[1.125rem] sm:p-5", styles.accent)}>
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
               {eyebrow ? (
-                <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                <p className="text-[0.66rem] font-semibold uppercase tracking-[0.16em] text-slate-400">
                   {eyebrow}
                 </p>
               ) : null}
-              <p className="mt-2 text-sm font-medium text-slate-500">{title}</p>
-              <p className="mt-3 text-3xl font-semibold tracking-[-0.06em] text-slate-950 sm:text-[2.15rem]">
+              <p className="mt-1.5 text-sm font-medium text-slate-500">{title}</p>
+              <p className="mt-2.5 text-[1.85rem] font-semibold tracking-[-0.06em] text-slate-950 sm:text-[2.05rem]">
                 {value}
               </p>
             </div>
 
             <div
               className={cn(
-                "flex h-12 w-12 shrink-0 items-center justify-center rounded-[16px] border shadow-[0_14px_32px_-24px_rgba(15,23,42,0.45)] transition-transform duration-200 group-hover:-translate-y-0.5",
+                "flex h-11 w-11 shrink-0 items-center justify-center rounded-[15px] border shadow-[0_14px_32px_-24px_rgba(15,23,42,0.45)] transition-transform duration-200 group-hover:-translate-y-0.5",
                 styles.icon
               )}
             >
@@ -83,8 +83,8 @@ export function MetricCard({
           </div>
 
           {detail ? (
-            <div className={cn("mt-5 flex items-center gap-2 text-sm", styles.detail)}>
-              <ArrowUpRight className="h-4 w-4" />
+            <div className={cn("mt-4 flex items-center gap-2 text-sm", styles.detail)}>
+              <ArrowUpRight className="h-3.5 w-3.5" />
               <span>{detail}</span>
             </div>
           ) : null}

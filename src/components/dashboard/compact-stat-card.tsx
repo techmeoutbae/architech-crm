@@ -26,11 +26,11 @@ export function CompactStatCard({
   tone = "slate",
 }: CompactStatCardProps) {
   return (
-    <Card className={cn("overflow-hidden border shadow-[0_18px_44px_-34px_rgba(15,23,42,0.28)]", toneStyles[tone])}>
-      <CardContent className="p-4 sm:p-5">
-        <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-current/55">{label}</p>
-        <p className="mt-3 text-3xl font-semibold tracking-[-0.05em] text-slate-950">{value}</p>
-        {detail ? <p className="mt-2 text-sm leading-6 text-slate-500">{detail}</p> : null}
+    <Card className={cn("overflow-hidden border shadow-[0_16px_40px_-34px_rgba(15,23,42,0.24)]", toneStyles[tone])}>
+      <CardContent className="p-4 sm:p-[1.125rem]">
+        <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-current/55">{label}</p>
+        <p className="mt-2.5 text-[1.9rem] font-semibold tracking-[-0.05em] text-slate-950 sm:text-[2.1rem]">{value}</p>
+        {detail ? <p className="mt-1.5 text-sm leading-6 text-slate-500">{detail}</p> : null}
       </CardContent>
     </Card>
   )

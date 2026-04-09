@@ -272,69 +272,68 @@ export async function AdminDashboardView() {
     <>
       <Header
         title="Dashboard"
-        subtitle="Run sales, delivery, billing, and client operations from a calmer premium control center."
+        subtitle="Track sales, delivery, billing, and client health in one workspace."
         user={user}
         showSearch
         showQuickAdd
       />
 
       <div className="flex-1 overflow-auto">
-        <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-6 p-4 pb-10 sm:p-6 xl:p-8">
-          <section className="grid gap-4 rounded-[28px] border border-white/75 bg-[linear-gradient(180deg,rgba(255,255,255,0.8)_0%,rgba(247,250,255,0.72)_100%)] p-5 shadow-[0_28px_60px_-42px_rgba(15,23,42,0.24)] backdrop-blur-xl xl:grid-cols-[1.25fr_0.95fr] xl:p-7">
+        <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-5 p-4 pb-10 sm:p-5 xl:p-7">
+          <section className="grid gap-4 rounded-[26px] border border-white/75 bg-[linear-gradient(180deg,rgba(255,255,255,0.8)_0%,rgba(247,250,255,0.72)_100%)] p-4 shadow-[0_28px_60px_-42px_rgba(15,23,42,0.24)] backdrop-blur-xl sm:p-5 xl:grid-cols-[1.15fr_0.95fr] xl:p-6">
             <div className="max-w-[46rem]">
-              <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
-                Executive workspace
+              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-slate-400">
+                Executive summary
               </p>
-              <h2 className="mt-3 text-2xl font-semibold tracking-[-0.05em] text-slate-950 sm:text-[2.35rem]">
-                Keep the agency operating system polished, visible, and decisively calm.
+              <h2 className="mt-2.5 text-[1.75rem] font-semibold tracking-[-0.05em] text-slate-950 sm:text-[2rem] xl:text-[2.2rem]">
+                See sales, delivery, and billing at a glance.
               </h2>
-              <p className="mt-3 max-w-[42rem] text-sm leading-7 text-slate-500">
-                This workspace surfaces pipeline momentum, delivery load, payment risk, and recent operating activity
-                in one premium control layer for Architech Designs.
+              <p className="mt-2.5 max-w-[38rem] text-sm leading-6 text-slate-500">
+                Review pipeline movement, project load, collections, and recent updates without leaving the dashboard.
               </p>
 
-              <div className="mt-6 flex flex-wrap gap-3">
+              <div className="mt-5 flex flex-wrap gap-2.5">
                 <Badge variant="blue" className="px-3 py-1.5 text-xs">
                   <Sparkles className="mr-1.5 h-3.5 w-3.5" />
-                  Premium agency CRM
+                  Premium workspace
                 </Badge>
                 <Badge variant="secondary" className="px-3 py-1.5 text-xs">
-                  {stats.activeProjects} delivery workspaces live
+                  {stats.activeProjects} active projects
                 </Badge>
                 <Badge variant={stats.overdueInvoices > 0 ? "warning" : "success"} className="px-3 py-1.5 text-xs">
-                  {stats.overdueInvoices > 0 ? `${stats.overdueInvoices} invoices need attention` : "Collections healthy"}
+                  {stats.overdueInvoices > 0 ? `${stats.overdueInvoices} invoices to review` : "Collections healthy"}
                 </Badge>
               </div>
             </div>
 
             <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1 2xl:grid-cols-3">
-              <div className="rounded-[20px] border border-slate-200/80 bg-white/78 p-4 shadow-[0_20px_36px_-30px_rgba(15,23,42,0.18)]">
-                <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
+              <div className="rounded-[18px] border border-slate-200/80 bg-white/78 p-4 shadow-[0_20px_36px_-30px_rgba(15,23,42,0.18)]">
+                <p className="text-[0.66rem] font-semibold uppercase tracking-[0.15em] text-slate-400">
                   Pipeline
                 </p>
-                <p className="mt-3 text-2xl font-semibold tracking-[-0.05em] text-slate-950">{stats.activeLeads}</p>
-                <p className="mt-2 text-sm text-slate-500">active opportunities across sales stages</p>
+                <p className="mt-2.5 text-[1.65rem] font-semibold tracking-[-0.05em] text-slate-950">{stats.activeLeads}</p>
+                <p className="mt-1.5 text-sm text-slate-500">open opportunities</p>
               </div>
-              <div className="rounded-[20px] border border-slate-200/80 bg-white/78 p-4 shadow-[0_20px_36px_-30px_rgba(15,23,42,0.18)]">
-                <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
+              <div className="rounded-[18px] border border-slate-200/80 bg-white/78 p-4 shadow-[0_20px_36px_-30px_rgba(15,23,42,0.18)]">
+                <p className="text-[0.66rem] font-semibold uppercase tracking-[0.15em] text-slate-400">
                   Delivery
                 </p>
-                <p className="mt-3 text-2xl font-semibold tracking-[-0.05em] text-slate-950">{stats.activeProjects}</p>
-                <p className="mt-2 text-sm text-slate-500">{stats.completedProjects} completed projects archived cleanly</p>
+                <p className="mt-2.5 text-[1.65rem] font-semibold tracking-[-0.05em] text-slate-950">{stats.activeProjects}</p>
+                <p className="mt-1.5 text-sm text-slate-500">{stats.completedProjects} completed</p>
               </div>
-              <div className="rounded-[20px] border border-slate-200/80 bg-white/78 p-4 shadow-[0_20px_36px_-30px_rgba(15,23,42,0.18)]">
-                <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
+              <div className="rounded-[18px] border border-slate-200/80 bg-white/78 p-4 shadow-[0_20px_36px_-30px_rgba(15,23,42,0.18)]">
+                <p className="text-[0.66rem] font-semibold uppercase tracking-[0.15em] text-slate-400">
                   Revenue
                 </p>
-                <p className="mt-3 text-2xl font-semibold tracking-[-0.05em] text-slate-950">
+                <p className="mt-2.5 text-[1.65rem] font-semibold tracking-[-0.05em] text-slate-950">
                   {formatCurrency(stats.paidRevenue)}
                 </p>
-                <p className="mt-2 text-sm text-slate-500">paid revenue recognized inside the CRM</p>
+                <p className="mt-1.5 text-sm text-slate-500">paid revenue recorded</p>
               </div>
             </div>
           </section>
 
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <MetricCard
               eyebrow="Sales"
               title="Active leads"
@@ -373,13 +372,13 @@ export async function AdminDashboardView() {
             />
           </div>
 
-          <div className="grid gap-6 xl:grid-cols-[1.35fr_0.95fr]">
+          <div className="grid gap-5 xl:grid-cols-[1.35fr_0.95fr]">
             <Card>
-              <CardHeader className="border-b border-slate-200/75 pb-5">
+              <CardHeader className="border-b border-slate-200/75 pb-4">
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
-                      Pipeline overview
+                    <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-slate-400">
+                      Pipeline
                     </p>
                     <CardTitle className="mt-2">Sales and delivery stages</CardTitle>
                   </div>
@@ -388,15 +387,15 @@ export async function AdminDashboardView() {
                   </Button>
                 </div>
                 <CardDescription>
-                  Review lead momentum and project flow without leaving the executive dashboard.
+                  Review pipeline counts without leaving the dashboard.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6 pt-6">
+              <CardContent className="space-y-5 pt-5">
                 <div>
                   <div className="mb-3 flex items-center justify-between gap-3">
                     <div>
                       <h3 className="text-base font-semibold tracking-[-0.03em] text-slate-950">Lead pipeline</h3>
-                      <p className="mt-1 text-sm text-slate-500">Opportunity distribution across the sales lifecycle.</p>
+                      <p className="mt-1 text-sm text-slate-500">Opportunity distribution by stage.</p>
                     </div>
                     <Badge variant="secondary">{stats.activeLeads} active</Badge>
                   </div>
@@ -417,7 +416,7 @@ export async function AdminDashboardView() {
                   <div className="mb-3 flex items-center justify-between gap-3">
                     <div>
                       <h3 className="text-base font-semibold tracking-[-0.03em] text-slate-950">Project flow</h3>
-                      <p className="mt-1 text-sm text-slate-500">Delivery status across onboarding, build, and launch.</p>
+                      <p className="mt-1 text-sm text-slate-500">Delivery status by project phase.</p>
                     </div>
                     <Badge variant="secondary">{stats.activeProjects} in motion</Badge>
                   </div>
@@ -437,16 +436,16 @@ export async function AdminDashboardView() {
             </Card>
 
             <Card>
-              <CardHeader className="border-b border-slate-200/75 pb-5">
-                <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
+              <CardHeader className="border-b border-slate-200/75 pb-4">
+                <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-slate-400">
                   Quick actions
                 </p>
                 <CardTitle className="mt-2">Move the workspace forward</CardTitle>
                 <CardDescription>
-                  The highest-frequency actions are grouped here with better spacing and clearer intent.
+                  The most common actions are grouped here for faster navigation.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="grid gap-3 pt-6">
+              <CardContent className="grid gap-3 pt-5">
                 {quickActions.map((action) => {
                   const Icon = action.icon
 
@@ -472,25 +471,25 @@ export async function AdminDashboardView() {
                   )
                 })}
 
-                <div className="rounded-[20px] border border-dashed border-slate-200 bg-slate-50/70 p-4">
+                <div className="rounded-[18px] border border-dashed border-slate-200 bg-slate-50/70 p-4">
                   <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
                     <Plus className="h-4 w-4 text-[#1b4d7e]" />
-                    Clean operational rhythm
+                    Keep the workspace moving
                   </div>
                   <p className="mt-2 text-sm leading-6 text-slate-500">
-                    Use these shortcuts to keep intake, delivery, and billing updates moving without hunting through the UI.
+                    Use these shortcuts to update intake, delivery, and billing without digging through the CRM.
                   </p>
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          <div className="grid gap-6 xl:grid-cols-[1.35fr_0.95fr]">
+          <div className="grid gap-5 xl:grid-cols-[1.35fr_0.95fr]">
             <Card>
-              <CardHeader className="border-b border-slate-200/75 pb-5">
+              <CardHeader className="border-b border-slate-200/75 pb-4">
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                    <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-slate-400">
                       Recent activity
                     </p>
                     <CardTitle className="mt-2">Latest workspace movement</CardTitle>
@@ -498,7 +497,7 @@ export async function AdminDashboardView() {
                   <Badge variant="secondary">{recentActivity.length} items</Badge>
                 </div>
                 <CardDescription>
-                  A cleaner feed of new leads, project updates, and invoice events across the CRM.
+                  New leads, project updates, and invoice events across the workspace.
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-0">
@@ -506,8 +505,14 @@ export async function AdminDashboardView() {
                   <div className="p-6">
                     <EmptyStateCard
                       icon={Sparkles}
-                      title="No recent activity yet"
-                      description="Activity appears here as the team captures leads, updates delivery, and creates invoices."
+                      title="No recent activity"
+                      description="Once the team adds leads, updates projects, or creates invoices, the feed will appear here."
+                      hint="Start with intake"
+                      action={
+                        <Button asChild size="sm">
+                          <Link href="/admin/leads">Open leads</Link>
+                        </Button>
+                      }
                     />
                   </div>
                 ) : (
@@ -519,7 +524,7 @@ export async function AdminDashboardView() {
                         <Link
                           key={item.id}
                           href={item.href}
-                          className="flex items-center gap-4 px-6 py-4 no-underline transition hover:bg-[linear-gradient(90deg,rgba(239,246,255,0.58),rgba(255,255,255,0.92))]"
+                          className="flex flex-col gap-3 px-5 py-4 no-underline transition hover:bg-[linear-gradient(90deg,rgba(239,246,255,0.58),rgba(255,255,255,0.92))] sm:flex-row sm:items-center sm:gap-4 sm:px-6"
                         >
                           <div
                             className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-[16px] border ${item.iconClassName}`}
@@ -527,13 +532,13 @@ export async function AdminDashboardView() {
                             <Icon className="h-5 w-5" />
                           </div>
                           <div className="min-w-0 flex-1">
-                            <div className="flex items-center gap-2">
+                            <div className="flex flex-wrap items-center gap-2">
                               <p className="truncate text-sm font-semibold text-slate-950">{item.title}</p>
                               <Badge variant={item.badgeVariant}>{item.badgeLabel}</Badge>
                             </div>
-                            <p className="mt-1 truncate text-sm text-slate-500">{item.description}</p>
+                            <p className="mt-1 text-sm text-slate-500 sm:truncate">{item.description}</p>
                           </div>
-                          <div className="hidden text-right sm:block">
+                          <div className="text-left sm:text-right">
                             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
                               Updated
                             </p>
@@ -548,23 +553,23 @@ export async function AdminDashboardView() {
             </Card>
 
             <Card>
-              <CardHeader className="border-b border-slate-200/75 pb-5">
+              <CardHeader className="border-b border-slate-200/75 pb-4">
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                    <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-slate-400">
                       Watchlist
                     </p>
-                    <CardTitle className="mt-2">Upcoming deadlines and billing risk</CardTitle>
+                    <CardTitle className="mt-2">Deadlines and billing risk</CardTitle>
                   </div>
                   <Badge variant={stats.overdueInvoices > 0 ? "warning" : "secondary"}>
                     {stats.overdueInvoices > 0 ? "Needs attention" : "Healthy"}
                   </Badge>
                 </div>
                 <CardDescription>
-                  Keep an eye on overdue invoices and delivery deadlines that are approaching.
+                  Keep overdue invoices and upcoming deadlines visible.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6 pt-6">
+              <CardContent className="space-y-5 pt-5">
                 <div>
                   <div className="mb-3 flex items-center gap-2">
                     <AlertTriangle className="h-4 w-4 text-amber-600" />
@@ -612,7 +617,7 @@ export async function AdminDashboardView() {
 
                   {upcomingProjects.length === 0 ? (
                     <div className="rounded-[18px] border border-slate-200/80 bg-slate-50/70 px-4 py-4 text-sm text-slate-500">
-                      No upcoming deadlines are scheduled yet.
+                      No upcoming deadlines scheduled.
                     </div>
                   ) : (
                     <div className="space-y-3">

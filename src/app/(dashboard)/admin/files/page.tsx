@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation"
+import Link from "next/link"
 import { Header } from "@/components/layout/header"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -77,30 +78,30 @@ export default async function FilesPage() {
     <>
       <Header
         title="Files"
-        subtitle="Manage documents and assets"
+        subtitle="Manage documents, assets, and delivery files."
         user={userData}
         showSearch
         showQuickAdd
       />
       
       <div className="flex-1 overflow-auto">
-        <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-6 p-4 pb-10 sm:p-6 xl:p-8">
-          <div className="flex flex-col gap-4 rounded-[26px] border border-white/75 bg-[linear-gradient(180deg,rgba(255,255,255,0.78)_0%,rgba(248,251,255,0.7)_100%)] p-5 shadow-[0_28px_60px_-42px_rgba(15,23,42,0.24)] backdrop-blur-xl sm:flex-row sm:items-end sm:justify-between">
+        <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-5 p-4 pb-10 sm:p-5 xl:p-7">
+          <div className="flex flex-col gap-4 rounded-[24px] border border-white/75 bg-[linear-gradient(180deg,rgba(255,255,255,0.78)_0%,rgba(248,251,255,0.7)_100%)] p-4 shadow-[0_28px_60px_-42px_rgba(15,23,42,0.24)] backdrop-blur-xl sm:p-5 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-[44rem]">
-              <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
-                Secure documents
+              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-slate-400">
+                Documents
               </p>
-              <h2 className="mt-3 text-2xl font-semibold tracking-[-0.05em] text-slate-950 sm:text-[2.3rem]">
-                Keep client assets, contracts, and deliverables organized with confidence.
+              <h2 className="mt-2.5 text-[1.65rem] font-semibold tracking-[-0.05em] text-slate-950 sm:text-[1.95rem]">
+                Keep documents organized and accessible.
               </h2>
-              <p className="mt-3 text-sm leading-7 text-slate-500">
-                Review file volume across categories and maintain a cleaner record of what has been shared, uploaded, and archived.
+              <p className="mt-2.5 text-sm leading-6 text-slate-500">
+                Review file categories, delivery assets, and supporting documents across the workspace.
               </p>
             </div>
 
-            <div className="flex items-center gap-3 rounded-[18px] border border-slate-200/80 bg-white/80 px-4 py-3 text-sm text-slate-500 shadow-[0_18px_34px_-28px_rgba(15,23,42,0.18)]">
+            <div className="flex items-center gap-3 rounded-[16px] border border-slate-200/80 bg-white/80 px-4 py-2.5 text-sm text-slate-500 shadow-[0_18px_34px_-28px_rgba(15,23,42,0.18)]">
               <ShieldCheck className="h-4 w-4 text-[#1b4d7e]" />
-              Secure storage overview
+              Secure storage
             </div>
           </div>
 
@@ -135,6 +136,12 @@ export default async function FilesPage() {
               icon={FileText}
               title="No files uploaded yet"
               description="Upload your first contract, deliverable, or supporting asset to build out the document workspace."
+              hint="Upload from a project or client record"
+              action={
+                <Button asChild size="sm" variant="outline">
+                  <Link href="/admin/projects">Open projects</Link>
+                </Button>
+              }
             />
           ) : (
             <Card className="overflow-hidden">

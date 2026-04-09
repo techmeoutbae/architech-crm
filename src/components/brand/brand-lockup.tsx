@@ -14,38 +14,48 @@ export function BrandLockup({
   const isDark = theme === "dark"
 
   return (
-    <div className={cn("flex items-center gap-3", className)}>
-      <div
-        className={cn(
-          "flex h-11 w-11 items-center justify-center rounded-2xl border text-[0.72rem] font-bold tracking-[0.24em] shadow-[0_16px_30px_-18px_rgba(15,23,42,0.7)]",
-          isDark
-            ? "border-white/15 bg-white/10 text-white backdrop-blur-md"
-            : "border-slate-200/80 bg-[linear-gradient(180deg,#ffffff_0%,#eef4fb_100%)] text-slate-900"
-        )}
-      >
-        AD
-      </div>
-
-      {!compact ? (
+    <div className={cn("flex items-center", className)}>
+      {compact ? (
+        <div
+          className={cn(
+            "inline-flex h-10 min-w-[3.5rem] items-center justify-center rounded-[14px] border px-3 shadow-[0_16px_30px_-24px_rgba(15,23,42,0.4)]",
+            isDark
+              ? "border-white/12 bg-white/[0.08] text-white"
+              : "border-slate-200/80 bg-white text-slate-900"
+          )}
+        >
+          <span className="text-[0.68rem] font-semibold uppercase tracking-[0.18em]">CRM</span>
+        </div>
+      ) : (
         <div className="min-w-0">
           <p
             className={cn(
-              "truncate text-sm font-semibold tracking-[0.02em]",
-              isDark ? "text-white" : "text-slate-950"
+              "text-[0.68rem] font-semibold uppercase tracking-[0.14em]",
+              isDark ? "text-white/46" : "text-slate-500"
             )}
           >
-            Architech Designs CRM
+            Architech Designs
           </p>
-          <p
-            className={cn(
-              "truncate text-[0.72rem] font-medium uppercase tracking-[0.18em]",
-              isDark ? "text-white/55" : "text-slate-500"
-            )}
-          >
-            Client portal and operations
-          </p>
+          <div className="mt-1 flex items-baseline gap-2">
+            <p
+              className={cn(
+                "truncate text-base font-semibold tracking-[-0.03em]",
+                isDark ? "text-white" : "text-slate-950"
+              )}
+            >
+              Architech CRM
+            </p>
+            <span
+              className={cn(
+                "hidden text-xs font-medium sm:inline",
+                isDark ? "text-white/42" : "text-slate-400"
+              )}
+            >
+              Client operations
+            </span>
+          </div>
         </div>
-      ) : null}
+      )}
     </div>
   )
 }

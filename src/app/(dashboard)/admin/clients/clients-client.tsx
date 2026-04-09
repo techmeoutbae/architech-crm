@@ -111,28 +111,28 @@ export default function ClientsClient({ userData }: { userData: UserData }) {
     <>
       <Header
         title="Clients"
-        subtitle="Review active relationships, project load, and account maturity with a calmer enterprise layout."
+        subtitle="Review accounts, project load, and lifecycle status."
         user={userData}
         showSearch
         showQuickAdd
       />
 
       <div className="flex-1 overflow-auto">
-        <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-6 p-4 pb-10 sm:p-6 xl:p-8">
-          <div className="flex flex-col gap-4 rounded-[26px] border border-white/75 bg-[linear-gradient(180deg,rgba(255,255,255,0.78)_0%,rgba(248,251,255,0.7)_100%)] p-5 shadow-[0_28px_60px_-42px_rgba(15,23,42,0.24)] backdrop-blur-xl sm:flex-row sm:items-end sm:justify-between">
+        <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-5 p-4 pb-10 sm:p-5 xl:p-7">
+          <div className="flex flex-col gap-4 rounded-[24px] border border-white/75 bg-[linear-gradient(180deg,rgba(255,255,255,0.78)_0%,rgba(248,251,255,0.7)_100%)] p-4 shadow-[0_28px_60px_-42px_rgba(15,23,42,0.24)] backdrop-blur-xl sm:p-5 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-[44rem]">
-              <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
-                Relationship management
+              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-slate-400">
+                Accounts
               </p>
-              <h2 className="mt-3 text-2xl font-semibold tracking-[-0.05em] text-slate-950 sm:text-[2.3rem]">
-                Give every client account a more polished operating view.
+              <h2 className="mt-2.5 text-[1.65rem] font-semibold tracking-[-0.05em] text-slate-950 sm:text-[1.95rem]">
+                Keep client accounts easy to scan.
               </h2>
-              <p className="mt-3 text-sm leading-7 text-slate-500">
-                Keep client records, current project volume, and account lifecycle status aligned for the team.
+              <p className="mt-2.5 text-sm leading-6 text-slate-500">
+                Review account status, current project load, and relationship history in one place.
               </p>
             </div>
 
-            <Button type="button" onClick={() => setModalOpen(true)}>
+            <Button type="button" size="sm" onClick={() => setModalOpen(true)}>
               <Plus className="h-4 w-4" />
               Add client
             </Button>
@@ -154,7 +154,13 @@ export default function ClientsClient({ userData }: { userData: UserData }) {
             <EmptyStateCard
               icon={Building2}
               title="No client accounts yet"
-              description="Create your first client to start organizing relationships, project workspaces, and delivery history."
+              description="Create your first client to organize relationships, project workspaces, and delivery history."
+              hint="Open the first account"
+              action={
+                <Button type="button" size="sm" onClick={() => setModalOpen(true)}>
+                  Add client
+                </Button>
+              }
             />
           ) : (
             <Card>
