@@ -2,49 +2,70 @@
 
 import { useState, useEffect } from "react"
 import { createClient } from "@/lib/supabase/client"
-import { formatDate, formatCurrency } from "@/lib/utils"
-import { FolderKanban, Plus } from "lucide-react"
+import { formatDate } from "@/lib/utils"
+import { FolderKanban, Plus, CalendarDays } from "lucide-react"
 import { AddProjectModal } from "@/components/projects/AddProjectModal"
 import Link from "next/link"
+import { Header } from "@/components/layout/header"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Progress } from "@/components/ui/progress"
+import { CompactStatCard } from "@/components/dashboard/compact-stat-card"
+import { EmptyStateCard } from "@/components/dashboard/empty-state-card"
+import type { BadgeProps } from "@/components/ui/badge"
 
 const STATUS_LABELS: Record<string, string> = {
-  onboarding: 'Onboarding',
-  planning: 'Planning',
-  design: 'Design',
-  development: 'Development',
-  revisions: 'Revisions',
-  launch: 'Launch',
-  completed: 'Completed',
+  onboarding: "Onboarding",
+  planning: "Planning",
+  design: "Design",
+  development: "Development",
+  revisions: "Revisions",
+  launch: "Launch",
+  completed: "Completed",
 }
 
 const PACKAGE_LABELS: Record<string, string> = {
-  basic: 'Basic',
-  premium: 'Premium',
-  growth: 'Growth',
-  custom: 'Custom',
+  basic: "Basic",
+  premium: "Premium",
+  growth: "Growth",
+  custom: "Custom",
 }
 
-function getStatusClass(status: string) {
-  const map: Record<string, string> = {
-    onboarding: 'badge-onboarding',
-    planning: 'badge-planning',
-    design: 'badge-design',
-    development: 'badge-development',
-    revisions: 'badge-revisions',
-    launch: 'badge-launch',
-    completed: 'badge-completed',
-  }
-  return map[status] || 'badge-onboarding'
+type BadgeVariant = NonNullable<BadgeProps["variant"]>
+
+const STATUS_VARIANTS: Record<string, BadgeVariant> = {
+  onboarding: "blue",
+  planning: "indigo",
+  design: "purple",
+  development: "cyan",
+  revisions: "warning",
+  launch: "orange",
+  completed: "success",
 }
 
-function getPackageClass(pkg: string) {
-  const map: Record<string, string> = {
-    basic: 'badge-inactive',
-    premium: 'badge-new',
-    growth: 'badge-won',
-    custom: 'badge-discovery',
-  }
-  return map[pkg] || 'badge-inactive'
+const STATUS_TONES: Record<string, "blue" | "indigo" | "violet" | "cyan" | "amber" | "slate" | "emerald"> = {
+  onboarding: "blue",
+  planning: "indigo",
+  design: "violet",
+  development: "cyan",
+  revisions: "amber",
+  launch: "slate",
+  completed: "emerald",
+}
+
+const PACKAGE_VARIANTS: Record<string, BadgeVariant> = {
+  basic: "secondary",
+  premium: "blue",
+  growth: "indigo",
+  custom: "purple",
+}
+
+interface UserData {
+  email: string
+  full_name: string | null
+  avatar_url: string | null
+  role: string
 }
 
 interface Project {
@@ -59,16 +80,12 @@ interface Project {
   created_at: string
 }
 
-export default function ProjectsClient() {
+export default function ProjectsClient({ userData }: { userData: UserData }) {
   const [projects, setProjects] = useState<Project[]>([])
   const [loading, setLoading] = useState(true)
   const [modalOpen, setModalOpen] = useState(false)
 
-  useEffect(() => {
-    fetchProjects()
-  }, [])
-
-  const fetchProjects = async () => {
+  async function fetchProjects() {
     const supabase = createClient()
     const { data } = await supabase
       .from('projects')
@@ -78,6 +95,31 @@ export default function ProjectsClient() {
     setLoading(false)
   }
 
+  useEffect(() => {
+    let isActive = true
+    const supabase = createClient()
+
+    async function loadProjects() {
+      const { data } = await supabase
+        .from('projects')
+        .select(`*, client:clients(id, business_name)`)
+        .order('created_at', { ascending: false })
+
+      if (!isActive) {
+        return
+      }
+
+      setProjects(data || [])
+      setLoading(false)
+    }
+
+    void loadProjects()
+
+    return () => {
+      isActive = false
+    }
+  }, [])
+
   const statusCounts = projects.reduce((acc: Record<string, number>, p) => {
     acc[p.status] = (acc[p.status] || 0) + 1
     return acc
@@ -85,83 +127,131 @@ export default function ProjectsClient() {
 
   if (loading) {
     return (
-      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <div style={{ color: "#64748B" }}>Loading projects...</div>
+      <div className="flex flex-1 items-center justify-center p-8">
+        <div className="rounded-[18px] border border-slate-200/80 bg-white/82 px-5 py-4 text-sm font-medium text-slate-500 shadow-[0_20px_42px_-30px_rgba(15,23,42,0.18)]">
+          Loading projects...
+        </div>
       </div>
     )
   }
 
   return (
     <>
-      <header style={{ background: "white", padding: "20px 24px", borderBottom: "1px solid #E2E8F0" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <div>
-            <h1 style={{ fontSize: "22px", fontWeight: "600", color: "#0F172A" }}>Projects</h1>
-            <p style={{ fontSize: "13px", color: "#64748B", marginTop: "2px" }}>Track and manage client projects</p>
-          </div>
-          <button 
-            onClick={() => setModalOpen(true)}
-            style={{ padding: "10px 20px", background: "#0A2540", borderRadius: "8px", fontWeight: "500", fontSize: "14px", color: "white", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px" }}
-          >
-            <Plus style={{ width: "16px", height: "16px" }} /> New Project
-          </button>
-        </div>
-      </header>
-      
-      <div style={{ flex: 1, overflow: "auto", padding: "24px" }}>
-        
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: "12px", marginBottom: "24px" }}>
-          {Object.entries(STATUS_LABELS).map(([status, label]) => (
-            <div key={status} className="card-premium" style={{ padding: "16px", textAlign: "center" }}>
-              <div style={{ fontSize: "24px", fontWeight: "700", color: "#0F172A" }}>{statusCounts[status] || 0}</div>
-              <div style={{ fontSize: "12px", color: "#64748B", marginTop: "4px" }}>{label}</div>
-            </div>
-          ))}
-        </div>
+      <Header
+        title="Projects"
+        subtitle="Keep delivery work structured, visible, and premium from kickoff to launch."
+        user={userData}
+        showSearch
+        showQuickAdd
+      />
 
-        {projects.length === 0 ? (
-          <div className="card-premium" style={{ padding: "48px", textAlign: "center" }}>
-            <div className="empty-state-icon">
-              <FolderKanban style={{ width: "28px", height: "28px" }} />
+      <div className="flex-1 overflow-auto">
+        <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-6 p-4 pb-10 sm:p-6 xl:p-8">
+          <div className="flex flex-col gap-4 rounded-[26px] border border-white/75 bg-[linear-gradient(180deg,rgba(255,255,255,0.78)_0%,rgba(248,251,255,0.7)_100%)] p-5 shadow-[0_28px_60px_-42px_rgba(15,23,42,0.24)] backdrop-blur-xl sm:flex-row sm:items-end sm:justify-between">
+            <div className="max-w-[44rem]">
+              <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                Delivery workspace
+              </p>
+              <h2 className="mt-3 text-2xl font-semibold tracking-[-0.05em] text-slate-950 sm:text-[2.3rem]">
+                Track milestones, package scope, and launch readiness with clarity.
+              </h2>
+              <p className="mt-3 text-sm leading-7 text-slate-500">
+                Monitor where each client project sits in production, which package it belongs to, and how
+                close it is to delivery.
+              </p>
             </div>
-            <div className="empty-state-title">No projects yet</div>
-            <div className="empty-state-description">Create your first project to get started</div>
+
+            <Button type="button" onClick={() => setModalOpen(true)}>
+              <Plus className="h-4 w-4" />
+              New project
+            </Button>
           </div>
-        ) : (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "20px" }}>
-            {projects.map((project) => (
-              <Link key={project.id} href={`/admin/projects/${project.id}`} style={{ textDecoration: "none" }}>
-                <div className="card-premium" style={{ padding: "20px", transition: "all 0.2s" }}>
-                  <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "16px" }}>
-                    <div>
-                      <div style={{ fontWeight: "600", color: "#0F172A", fontSize: "16px", marginBottom: "4px" }}>{project.name}</div>
-                      <div style={{ fontSize: "13px", color: "#64748B" }}>{project.client?.business_name || 'No client'}</div>
-                    </div>
-                    <div style={{ display: "flex", gap: "8px" }}>
-                      <span className={`badge ${getPackageClass(project.package_type)}`}>{PACKAGE_LABELS[project.package_type] || project.package_type}</span>
-                      <span className={`badge ${getStatusClass(project.status)}`}>{STATUS_LABELS[project.status] || project.status}</span>
-                    </div>
+
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-7">
+          {Object.entries(STATUS_LABELS).map(([status, label]) => (
+            <CompactStatCard
+              key={status}
+              label={label}
+              value={statusCounts[status] || 0}
+              detail={status === "completed" ? "Delivered work" : "Current delivery stage"}
+              tone={STATUS_TONES[status]}
+            />
+          ))}
+          </div>
+
+          {projects.length === 0 ? (
+            <EmptyStateCard
+              icon={FolderKanban}
+              title="No projects in motion yet"
+              description="Create a project to start tracking delivery stages, scope, and launch progress for each client."
+            />
+          ) : (
+            <Card>
+              <CardHeader className="border-b border-slate-200/75 pb-5">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                      Delivery board
+                    </p>
+                    <CardTitle className="mt-2">Project portfolio</CardTitle>
                   </div>
-                  
-                  <div style={{ marginBottom: "16px" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
-                      <span style={{ fontSize: "13px", color: "#64748B" }}>Progress</span>
-                      <span style={{ fontSize: "13px", fontWeight: "500", color: "#0F172A" }}>{project.progress_percentage || 0}%</span>
-                    </div>
-                    <div className="progress-premium">
-                      <div className="progress-premium-bar" style={{ width: `${project.progress_percentage || 0}%` }} />
-                    </div>
-                  </div>
-                  
-                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", color: "#64748B" }}>
-                    <div>{project.package_type} package</div>
-                    {project.end_date && <div>Due: {formatDate(project.end_date)}</div>}
-                  </div>
+                  <Badge variant="secondary">{projects.length} projects</Badge>
                 </div>
-              </Link>
-            ))}
-          </div>
-        )}
+                <CardDescription>
+                  Open any project for milestones, task tracking, files, and communication history.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <div className="grid gap-4 lg:grid-cols-2">
+                  {projects.map((project) => (
+                    <Link
+                      key={project.id}
+                      href={`/admin/projects/${project.id}`}
+                      className="group rounded-[20px] border border-slate-200/80 bg-white/78 p-5 no-underline transition hover:-translate-y-1 hover:border-slate-300 hover:bg-white hover:shadow-[0_24px_55px_-34px_rgba(15,23,42,0.24)]"
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="min-w-0">
+                          <p className="truncate text-lg font-semibold tracking-[-0.03em] text-slate-950">
+                            {project.name}
+                          </p>
+                          <p className="mt-1 truncate text-sm text-slate-500">
+                            {project.client?.business_name || "Client not assigned"}
+                          </p>
+                        </div>
+                        <div className="flex flex-wrap justify-end gap-2">
+                          <Badge variant={PACKAGE_VARIANTS[project.package_type] || "secondary"}>
+                            {PACKAGE_LABELS[project.package_type] || project.package_type}
+                          </Badge>
+                          <Badge variant={STATUS_VARIANTS[project.status] || "secondary"}>
+                            {STATUS_LABELS[project.status] || project.status}
+                          </Badge>
+                        </div>
+                      </div>
+
+                      <div className="mt-5 rounded-[18px] border border-slate-200/70 bg-slate-50/75 p-4">
+                        <div className="flex items-center justify-between text-sm font-medium text-slate-500">
+                          <span>Progress</span>
+                          <span>{project.progress_percentage || 0}%</span>
+                        </div>
+                        <Progress className="mt-3 h-2.5" value={project.progress_percentage || 0} />
+                        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm text-slate-500">
+                          <span className="inline-flex items-center gap-2">
+                            <FolderKanban className="h-4 w-4 text-slate-400" />
+                            {PACKAGE_LABELS[project.package_type] || project.package_type}
+                          </span>
+                          <span className="inline-flex items-center gap-2">
+                            <CalendarDays className="h-4 w-4 text-slate-400" />
+                            {project.end_date ? `Due ${formatDate(project.end_date)}` : "No deadline set"}
+                          </span>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       </div>
 
       <AddProjectModal open={modalOpen} onOpenChange={setModalOpen} onSuccess={fetchProjects} />

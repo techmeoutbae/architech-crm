@@ -114,7 +114,7 @@ export function Sidebar({ user }: SidebarProps) {
     <>
       <aside
         className={cn(
-          "hidden lg:flex lg:h-screen lg:shrink-0 lg:flex-col lg:border-r lg:border-white/10 lg:bg-[linear-gradient(180deg,#051423_0%,#071a2f_46%,#0b223a_100%)] lg:text-white lg:shadow-[inset_-1px_0_0_rgba(255,255,255,0.04)]",
+          "hidden lg:flex lg:h-screen lg:shrink-0 lg:flex-col lg:border-r lg:border-white/10 lg:bg-[linear-gradient(180deg,#04111d_0%,#071828_42%,#0c2338_100%)] lg:text-white lg:shadow-[inset_-1px_0_0_rgba(255,255,255,0.04)]",
           collapsed ? "lg:w-[106px]" : "lg:w-[292px]"
         )}
       >
@@ -167,14 +167,17 @@ export function Sidebar({ user }: SidebarProps) {
                         key={link.href}
                         href={link.href}
                         className={cn(
-                          "group flex items-center gap-3 rounded-[18px] px-3 py-3 text-sm font-medium transition",
+                          "group relative flex items-center gap-3 rounded-[18px] border px-3 py-3 text-sm font-medium transition",
                           collapsed && "justify-center px-0",
                           active
-                            ? "bg-white text-slate-950 shadow-[0_18px_40px_-28px_rgba(255,255,255,0.45)]"
-                            : "text-white/65 hover:bg-white/8 hover:text-white"
+                            ? "border-white/12 bg-white/[0.11] text-white shadow-[0_18px_40px_-34px_rgba(6,20,38,0.86)]"
+                            : "border-transparent text-white/62 hover:border-white/8 hover:bg-white/[0.05] hover:text-white"
                         )}
                         title={collapsed ? link.label : undefined}
                       >
+                        {active ? (
+                          <span className="absolute inset-y-2 left-0 w-1 rounded-full bg-[linear-gradient(180deg,#73a8ff_0%,#dbe9ff_100%)]" />
+                        ) : null}
                         <Icon className="h-5 w-5 shrink-0" />
                         {!collapsed ? <span>{link.label}</span> : null}
                       </Link>
@@ -187,7 +190,7 @@ export function Sidebar({ user }: SidebarProps) {
 
           <div className="mt-6 rounded-[24px] border border-white/10 bg-white/[0.06] p-3 backdrop-blur">
             <div className={cn("flex items-center gap-3", collapsed && "justify-center")}>
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/12 text-sm font-semibold text-white">
+              <div className="flex h-11 w-11 items-center justify-center rounded-[16px] bg-white/12 text-sm font-semibold text-white">
                 {getInitials(user?.full_name || user?.email || "AD")}
               </div>
               {!collapsed ? (

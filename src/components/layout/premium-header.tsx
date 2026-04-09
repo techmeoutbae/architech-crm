@@ -99,24 +99,28 @@ export function Header({
   }
 
   return (
-    <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/78 px-4 py-4 backdrop-blur-xl sm:px-6">
-      <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+    <header className="sticky top-0 z-30 border-b border-slate-200/75 bg-[linear-gradient(180deg,rgba(255,255,255,0.86)_0%,rgba(246,249,253,0.78)_100%)] px-4 py-4 backdrop-blur-2xl sm:px-6">
+      <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
         <div className="min-w-0">
           <div className="flex items-center gap-2 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
-            <Sparkles className="h-3.5 w-3.5 text-[#4e8cf0]" />
+            <Sparkles className="h-3.5 w-3.5 text-[#477fd8]" />
             {isClient ? "Client workspace" : "Operations workspace"}
           </div>
           {title ? (
-            <h1 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-slate-950 sm:text-[2rem]">
+            <h1 className="mt-2 text-[2rem] font-semibold tracking-[-0.07em] text-slate-950 sm:text-[2.35rem]">
               {title}
             </h1>
           ) : null}
-          {subtitle ? <p className="mt-1 text-sm leading-6 text-slate-600">{subtitle}</p> : null}
+          {subtitle ? (
+            <p className="mt-2 max-w-[44rem] text-sm leading-6 text-slate-500 sm:text-[0.95rem]">
+              {subtitle}
+            </p>
+          ) : null}
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3 xl:justify-end">
           {showSearch ? (
-            <div className="relative hidden min-w-[18rem] flex-1 md:block xl:min-w-[22rem]">
+            <div className="relative hidden min-w-[18rem] flex-1 md:block xl:min-w-[23rem]">
               <form onSubmit={handleSearchSubmit}>
                 <label className="sr-only" htmlFor="workspace-search">
                   Search pages
@@ -131,13 +135,13 @@ export function Header({
                   onBlur={() => {
                     window.setTimeout(() => setSearchFocused(false), 120)
                   }}
-                  placeholder="Jump to leads, projects, invoices, files…"
-                  className="h-11 w-full rounded-2xl border border-slate-200/80 bg-slate-50/75 pl-11 pr-4 text-sm text-slate-900 outline-none transition focus:border-[#2f6fdf] focus:bg-white focus:ring-4 focus:ring-[#d8e6ff]"
+                  placeholder="Jump to leads, projects, invoices, or files"
+                  className="h-12 w-full rounded-[18px] border border-slate-200/80 bg-white/82 pl-11 pr-4 text-sm text-slate-900 shadow-[0_18px_36px_-30px_rgba(15,23,42,0.32)] outline-none transition focus:border-[#2f6fdf] focus:bg-white focus:ring-4 focus:ring-[#d8e6ff]"
                 />
               </form>
 
               {searchFocused ? (
-                <div className="absolute left-0 right-0 top-[calc(100%+0.75rem)] overflow-hidden rounded-[24px] border border-slate-200/80 bg-white/96 p-2 shadow-[0_28px_60px_-36px_rgba(15,23,42,0.42)] backdrop-blur-xl">
+                <div className="absolute left-0 right-0 top-[calc(100%+0.75rem)] overflow-hidden rounded-[24px] border border-slate-200/80 bg-white/97 p-2 shadow-[0_28px_60px_-36px_rgba(15,23,42,0.42)] backdrop-blur-xl">
                   {filteredLinks.length > 0 ? (
                     filteredLinks.slice(0, 6).map((link) => (
                       <button
@@ -155,7 +159,7 @@ export function Header({
                     ))
                   ) : (
                     <div className="rounded-2xl px-4 py-4 text-sm text-slate-500">
-                      No matching sections yet. Try “projects”, “files”, or “invoices”.
+                      No matching sections yet. Try projects, files, or invoices.
                     </div>
                   )}
                 </div>
@@ -163,7 +167,11 @@ export function Header({
             </div>
           ) : null}
 
-          <Button asChild variant="outline" className="hidden sm:inline-flex">
+          <Button
+            asChild
+            variant="outline"
+            className="hidden border-white/70 bg-white/84 shadow-[0_18px_34px_-28px_rgba(15,23,42,0.3)] sm:inline-flex"
+          >
             <a href="mailto:support@architech.design">
               <LifeBuoy className="h-4 w-4" />
               Support
@@ -172,7 +180,11 @@ export function Header({
 
           {!isClient && shouldShowQuickAdd ? (
             <div className="relative">
-              <Button type="button" onClick={() => setQuickAddOpen((current) => !current)}>
+              <Button
+                type="button"
+                className="shadow-[0_22px_38px_-24px_rgba(8,33,61,0.86)]"
+                onClick={() => setQuickAddOpen((current) => !current)}
+              >
                 <Plus className="h-4 w-4" />
                 Create
               </Button>
@@ -207,8 +219,8 @@ export function Header({
           ) : null}
 
           {user ? (
-            <div className="flex items-center gap-3 rounded-[20px] border border-slate-200/80 bg-white/88 px-3 py-2 shadow-[0_18px_28px_-26px_rgba(15,23,42,0.35)]">
-              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-950 text-sm font-semibold text-white">
+            <div className="flex items-center gap-3 rounded-[18px] border border-slate-200/75 bg-white/84 px-3.5 py-2.5 shadow-[0_18px_32px_-28px_rgba(15,23,42,0.34)]">
+              <div className="flex h-10 w-10 items-center justify-center rounded-[14px] bg-slate-950 text-sm font-semibold text-white">
                 {getInitials(user.full_name || user.email)}
               </div>
               <div className="hidden xl:block">
@@ -229,7 +241,7 @@ export function Header({
           <Button
             type="button"
             variant="outline"
-            className="w-full justify-start"
+            className="w-full justify-start border-white/70 bg-white/82 shadow-[0_18px_34px_-28px_rgba(15,23,42,0.28)]"
             onClick={() => navigateTo(quickLinks[0]?.href ?? "/")}
           >
             <Search className="h-4 w-4" />

@@ -1,11 +1,13 @@
-import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import ClientsClient from "./clients-client"
+import { getDashboardUser } from "@/lib/dashboard-user"
 
 export default async function ClientsPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect("/login")
-  
-  return <ClientsClient />
+  const userData = await getDashboardUser()
+
+  if (!userData) {
+    redirect("/login")
+  }
+
+  return <ClientsClient userData={userData} />
 }
